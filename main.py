@@ -258,7 +258,6 @@ class MainMenu(Frame):
             instruction[2] = (color,0,1-color)
             instructions.append(instruction)
             color+=color_step
-        bc.condensate(instructions[0][0])
         self.new_figure('Test', instructions)
     # returns a float of the same value as the original scientific notation
     def sciToFloat(self, sci_string):

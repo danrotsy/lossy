@@ -17,12 +17,9 @@ def condensate(file_path):
         except IndexError:
             v = ''
         new_line = entries[0] + v
-        print new_line
 
-    print file_path
-
-    #with open(file_path, 'w') as file:
-        #file.writelines(data)
+    with open(file_path, 'w') as file:
+        file.writelines(data)
 
 def cut_run_num(folder_path):
 
