@@ -1,3 +1,7 @@
+# ==============================================================================
+# ------------------------------------------------------------------------------
+# Imports
+# ------------------------------------------------------------------------------
 try:
     import numpy as np
 except ImportError:
@@ -19,9 +23,18 @@ except ImportError:
     print 'the "ttk" library is required for this application'
 
 from numpy import arange
+# ==============================================================================
+
+
+
 
 
 class MainMenu(Frame):
+
+    # ==========================================================================
+    # --------------------------------------------------------------------------
+    # GUI creation methods
+    # --------------------------------------------------------------------------
     # instatiation method of MainMenu
     def __init__(self, parent):
         '''
@@ -30,14 +43,17 @@ class MainMenu(Frame):
 
         self.R_low = self.sciToFloat("0.02")
         self.R_high = self.sciToFloat("2")
+        # self.R_high = self.sciToFloat("1.8")
         self.R_step = self.sciToFloat("0.2")
 
         self.L_low = self.sciToFloat("0.079n")
         self.L_high = self.sciToFloat("7.9n")
+        # self.L_high = self.sciToFloat("7.11n")
         self.L_step = self.sciToFloat("0.79n")
 
         self.C_low = self.sciToFloat("0.22p")
         self.C_high = self.sciToFloat("22p")
+        # self.C_high = self.sciToFloat("19.8p")
         self.C_step = self.sciToFloat("2.2p")
 
         Frame.__init__(self, parent)
@@ -45,7 +61,6 @@ class MainMenu(Frame):
         self.parent = parent
         self.initUI()
         self.createFileDict('')
-        # test values
     # sets up the GUI itself
     def initUI(self):
         '''
@@ -149,7 +164,14 @@ class MainMenu(Frame):
     def update_cd(self,val):
         self.cdlabelvar.set(int(round(float(val))))
         self.cdscalevar.set(int(round(float(val))))
+    # ==========================================================================
 
+
+    # ==========================================================================
+    # --------------------------------------------------------------------------
+    # File-GUI interaction
+    # --------------------------------------------------------------------------
+    # finds and plots all files given info on the gui
     def gui_to_vals(self):
         self.errormsgvar.set('')
         out = []
@@ -238,13 +260,7 @@ class MainMenu(Frame):
             instructions.append(instruction)
             color+=color_step
         self.new_figure('Test', instructions)
-        # print "=============================TODO==============================="
-        # for task in todo:
-        #     print
-        #     print task
-        # print
-        # return out
-    # takes in values of desired plot and gives the key
+    # returns a float of the same value as the original scientific notation
     def sciToFloat(self, sci_string):
         '''
         sci_string: a string in scientific notation
@@ -261,8 +277,13 @@ class MainMenu(Frame):
                 multiplier += c
         out = float(num)*(10**conversion[multiplier])
         return out
-
+    # returns a string with the same value as the float in scientific notation
     def floatToSci(self, num):
+        '''
+        num:  a float
+
+        returns a string with the same value as the float in scientific notation
+        '''
         conversion = {0:'',3:'m',6:'u',9:'n',12:'p',15:'f'}
         num = float(num)
         for m in range(0,16,3):
@@ -281,7 +302,7 @@ class MainMenu(Frame):
                     else:
                         return str(round((num*(10**m)),3)) + conversion[m]
             #return str(round((num*(10**m)),2)) + conversion[m]
-
+    # takes values and returns a key for self.folder_dict
     def vals_to_key(self,rin,lin,cin,Cdrpin,signal,typein):
         '''
         rin         a float or string
@@ -292,16 +313,16 @@ class MainMenu(Frame):
         typein      a string (ac or trans)
         '''
         return ('({r},{l},{c}),{cdrp},{sig},{tp}').format(r=rin, l=lin, c=cin, cdrp=Cdrpin, sig=signal, tp=typein)
-
+    # returns the element in list closest to val
     def findClosest(self,list,val):
         '''
         list:      the list to be searched
         val:       the value to be compared
 
-        returns an element in list closest to val
+        returns the element in list closest to val
         '''
         return min(list, key=(lambda x:abs(x-val)))
-
+    # returns a list of keys for every file in the folder, and a list of all the Rs, Ls and Cs
     def createFileDict(self, folder_name):
         '''
         folder_name:the path of the folder to be scanned
@@ -346,7 +367,14 @@ class MainMenu(Frame):
                                 self.folder_dict[perm_dict_key] =r"{var_actrans}\Cdrp_{var_cdrp}_{var_signal}\StepInformationRline={var_r}Lline={var_l}Cline={var_c}.csv".format(var_actrans=lib, var_cdrp=cdrp, var_signal=signal, var_r=self.floatToSci(r), var_l=self.floatToSci(l), var_c=self.floatToSci(c))
 
         return self.folder_dict
+    # ==========================================================================
 
+
+    # ==========================================================================
+    # --------------------------------------------------------------------------
+    # Plotting Functionality
+    # --------------------------------------------------------------------------
+    # generates new figure and shows it
     def new_figure(self, title,plot_info):
         '''
         title:      plot
@@ -385,6 +413,8 @@ class MainMenu(Frame):
         fig = plt.figure()
         fig.suptitle(title, fontsize = 12, fontweight='bold')
         return fig
+    # ==========================================================================
+
 
 
 
