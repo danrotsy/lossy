@@ -23,6 +23,8 @@ except ImportError:
     print 'the "ttk" library is required for this application'
 
 from numpy import arange
+
+import bode_condensation as bc
 # ==============================================================================
 
 
@@ -233,9 +235,6 @@ class MainMenu(Frame):
         if self.cdscale.get() == 0:
             self.errormsgvar.set('the bus libraries are coming soon...')
             return None
-        if self.var.get() == 'Bode':
-            self.errormsgvar.set('the support for bode plots is coming soon...')
-            return None
         out.append(signal)
         atype = ''
         if self.var.get() == 'Bode':
@@ -259,6 +258,7 @@ class MainMenu(Frame):
             instruction[2] = (color,0,1-color)
             instructions.append(instruction)
             color+=color_step
+        bc.condensate(instructions[0][0])
         self.new_figure('Test', instructions)
     # returns a float of the same value as the original scientific notation
     def sciToFloat(self, sci_string):
