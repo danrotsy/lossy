@@ -24,7 +24,7 @@ except ImportError:
 
 from numpy import arange
 
-import bode_condensation as bc
+import bode_rename as br
 # ==============================================================================
 
 
