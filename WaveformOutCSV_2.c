@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 				strcpy(var_line, buffer);
 				continue;
 			}
-			fprintf(waveform_out, "%s\n", buffer);
+			fprintf(waveform_out, "%s", buffer);
 		}
 		s = buffer;
 		d = buffer;
