@@ -9,11 +9,15 @@ def apply_transfer_func(freq,amp,transfer_func): #freq,amp,transfer_func
     new_amp = [] # can this be a list?
     for i in range(0,len(amp)):
         current_freq = freq[i]
-        angle = math.radians(get_val(transfer_func[0],transfer_func[2],current_freq))
+        if current_freq < 0:
+            attenuation = get_val(transfer_func[0],transfer_func[1],abs(current_freq))
+            angle = -math.radians(get_val(transfer_func[0],transfer_func[2],abs(current_freq)))
+        else:
+            attenuation = get_val(transfer_func[0],transfer_func[1],current_freq)
+            angle = math.radians(get_val(transfer_func[0],transfer_func[2],current_freq))
         phase_shift = cmath.exp(complex(0,angle))
-        attenuation = get_val(transfer_func[0],transfer_func[1],current_freq)
-        print attenuation
-        new_amp.append(amp[i]*phase_shift*attenuation)
+        print current_freq, amp[i], amp[i]*phase_shift*attenuation
+        new_amp.append(amp[i]*phase_shift*attenuation*10)
 
     return new_amp
 
@@ -31,7 +35,7 @@ def invert_transfer_function(file_path,res):
         if len(line)>2:
             line_split = line[:-2]
             line_split = line_split.split(',')
-            line_split[1] = pow(10,(float(line_split[1])*(-1.0)/20.0))
+            line_split[1] = pow(10,(float(line_split[1])/-20.0))
             line_split[2] = float(line_split[2])*(-1.0)
             transfer_func_inv[0].append(float(line_split[0]))
             transfer_func_inv[1].append(line_split[1])
@@ -58,7 +62,7 @@ def transfer_function(file_path,res):
         if len(line)>2:
             line_split = line[:-2]
             line_split = line_split.split(',')
-            line_split[1] = pow(10,(float(line_split[1])*(1.0)/20.0))
+            line_split[1] = pow(10,(float(line_split[1])/20.0))
             transfer_function[0].append(float(line_split[0]))
             transfer_function[1].append(line_split[1])
             transfer_function[2].append(float(line_split[2]))
@@ -94,7 +98,7 @@ def get_val(func_x,func_y,x_in):
         return func_y[-1]
     else:
         left,right,left_index,right_index = findClosestTwo(func_x,x_in)
-        print left, x_in, right
+        # print left, x_in, right
         deltav = func_y[right_index] - func_y[left_index]
         deltat = right - left
         return deltav*((x_in-func_x[left_index])/deltat)+func_y[left_index]
@@ -132,6 +136,7 @@ def trans_fourier(file_path, shift):
 
 def inv_fourier(freq,amp):
     return np.fft.ifft(amp)
+
 # finds the closest two values to a given input over a set
 def findClosestTwo(in_list,val):
     '''
@@ -169,22 +174,22 @@ def genrange(interval, n):
         cur += inc
     return r
 
-t,v,amp,freq = trans_fourier(r"MultidropTransient\Cdrp_1p_Vout\StepInformationRline=1.02Lline=1.659nCline=2.42p.csv", False)
-transfer_func_inv = invert_transfer_function(r"MultidropBode\Cdrp_1p_Vout\StepInformationRline=1.02Lline=1.659nCline=2.42p.csv",120)
-transfer_func = transfer_function(r"MultidropBode\Cdrp_1p_Vout\StepInformationRline=1.02Lline=1.659nCline=2.42p.csv",120)
+t,v,amp,freq = trans_fourier(r"C:\Users\HEP\Desktop\transmission_line_inpulse_tran.csv", False)
+transfer_func_inv = invert_transfer_function(r"MultidropBode\Cdrp_1p_Vout\StepInformationRline=1.02Lline=1.659nCline=2.42p.csv",140)
+transfer_func = transfer_function(r"MultidropBode\Cdrp_1p_Vout\StepInformationRline=1.02Lline=1.659nCline=2.42p.csv",140)
 
-new_amp = apply_transfer_func(freq,amp,transfer_func_inv)
-print type(amp),type(new_amp)
-print len(t),len(new_amp)
-for i in range(0,len(amp)):
-    print freq[i],amp[i]
+new_amp = apply_transfer_func(freq,amp,transfer_func)
+# print type(amp),type(new_amp)
+# print len(t),len(new_amp)
+# for i in range(0,len(amp)):
+#     print freq[i],amp[i]
 new_v = inv_fourier(freq, new_amp)
 
-plt.plot(genrange(1e-7,len(new_v)),new_v.real,color='red',linestyle='-')
+# plt.plot(genrange(1e-7,len(new_v)),new_v.real,color='red',linestyle='-')
 # plt.plot(t,v,color='blue',linestyle='-')
 
-# plt.plot(transfer_func[0],transfer_func[1],color='red',linestyle='-')
-# plt.plot(transfer_func[0],transfer_func[2],color='red',linestyle='-')
+plt.plot(transfer_func[0],transfer_func[1],color='red',linestyle='-')
+plt.plot(transfer_func[0],transfer_func[2],color='red',linestyle='-')
 # plt.plot(transfer_func_inv[0],transfer_func_inv[1],color='blue',linestyle='-')
 # plt.plot(transfer_func_inv[0],transfer_func_inv[2],color='blue',linestyle='-')
 
