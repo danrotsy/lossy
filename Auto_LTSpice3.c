@@ -5,75 +5,7 @@
 #include<math.h>
 #include<ctype.h>
 	
-int expo_to_str(char *str, float expo)
-{
-	char *pch;
-	char buffer[10];
-	float significand;
-	int exp;
-	sprintf(str, "%E", expo);
-	strcpy(buffer, str);
-	strtok(buffer, "E");
-	significand = strtof(buffer, &pch);
-	exp = (int) strtol(pch+1, NULL, 10);
-	if(exp % 3) {
-		if(exp > 6) {
-			significand *= pow(10, exp-6);
-			exp = 6;
-		} else if(exp > 3 && exp < 6) {
-			significand *= pow(10, exp-3);	
-			exp = 3;
-		} else if(exp > 0 && exp < 3) {
-			significand *= pow(10, exp);
-			exp = 0;
-		} else if(exp > -3 && exp < 0) {
-			significand *= pow(10, exp+3);
-			exp = -3;
-		} else if(exp > -6 && exp < -3) {
-			significand *= pow(10, exp+6);
-			exp = -6;
-		} else if(exp > -9 && exp < -6) {
-			significand *= pow(10, exp+9);
-			exp = -9;
-		} else if(exp > -12 && exp < -9) {
-			significand *= pow(10, exp+12);
-			exp = -12;
-		} else if(exp > -15 && exp < -12) {
-			significand *= pow(10, exp+15);
-			exp = -15;
-		} else if(exp > -18 && exp < -15) {
-			significand *= pow(10, exp+18);
-			exp = -18;
-		}
-	}
-	sprintf(str, "%3.1f", significand);
-	switch(exp) {
-		case -18: strcpy(str+3, "a"); break;
-		case -15: strcpy(str+3, "f"); break;
-		case -12: strcpy(str+3, "p"); break;
-		case -9: strcpy(str+3, "n"); break;
-		case -6: strcpy(str+3, "u"); break;
-		case -3: strcpy(str+3, "m"); break;
-		case 0: strcpy(str+3, ""); break;
-		case 3: strcpy(str+3, "k"); break;
-		case 6: strcpy(str+3, "Meg"); break;
-		default: strcpy(str+3, ""); printf("Error in exp_to_str in switch statement!\n"); return 1;
-	}
-	return 0;
-}
-	
-int generate_step_array(float low, float high, float step, float *step_arary)
-{
-	int array_size = (int) ((high-low)/step+1);
-	int tmp = low;
-	step_array = malloc(sizeof(float)*array_size);
-	if(!step_array)
-		return 1;
-	for(int n=0; n < array_size; n++) {
-		step_array[n] = tmp;
-		tmp += step;
-	}
-}
+#include"Auto_LTS.h"
 
 int main(int argc, char* argv[])
 {
@@ -83,7 +15,6 @@ int main(int argc, char* argv[])
 	}
 	char filename_in[255];
 	strcpy(filename_in, argv[1]);
-	//char file_name_cir[] = "transmission_line.cir";
 	char cmd_ltspice[255];
 	char cmd_ltsputil[255];
 	char filename_out[17];
@@ -101,12 +32,18 @@ int main(int argc, char* argv[])
 	char *p_tok;
 	char *p_end;
 
-	float step_param_data[3][3];
-
+	char **step_name;
+	float *step_data[3];
+	int num_step = 3;
+	int curr_size = 3;
+	for(int n=0; n < 3; n++)
+		step_data[n] = malloc(curr_size*sizeof(float));
+	step_name = malloc(curr_size*sizeof(char*));
+	for(int i=0; i < curr_size; i++) 
+		step_name[i] = malloc(255*sizeof(char));
 	int param_index = 0;
 	int data_index = 0;
-	int length_index;
-	int cdrp_index;
+	int *ext_param_index = malloc(curr_size*sizeof(int));
 	
 	float tmp_data = 0;
 	
@@ -117,54 +54,43 @@ int main(int argc, char* argv[])
 	float cdrp_low = 1E-12;
 	float cdrp_high = 5E-12;
 	float cdrp_step = 1E-12;
+
+	float **ext_array;
 	
-	float length_param = step_length[0];
-	float cdrp_param = step_cdrp[0];
-
-	float *length_array;
-	float *cdrp_array;
-
-	generate_step_array(length_low, length_high, length_step, length_array);
-	generate_step_array(cdrp_low, cdrp_high, cdrp_step, cdrp_array);
-
 	FILE* tl_csv;
-	FILE* tl_netlist = fopen(file_name_cir, "r+");
+	FILE* tl_netlist = fopen(filename_in, "r+");
 	if(!tl_netlist) {
-		printf("Error in Opening Circuit file, %s: %s\n", file_name_cir, strerror(errno));
+		printf("Error in Opening Spice file, %s: %s\n", filename_in, strerror(errno));
 		return 0;
 	}
 	while(!feof(tl_netlist)) {
-		temp_l = ftell(tl_netlist);
+		tmp_pos = ftell(tl_netlist);
 		fgets(buffer, 255, tl_netlist);
 		p_tok = strtok(buffer, " ");
 		if(strcmp(buffer+1, "tran")==0) {
 			printf("Transient data\n");
 			buffer[5] = ' ';
-			tran_l = temp_l;
+			tran_pos = tmp_pos;
 		} else if(strcmp(buffer+1, "ac")==0) {
 			printf("AC data\n");
 			buffer[3] = ' ';
-			ac_l = temp_l;
+			ac_pos = tmp_pos;
 		} else if(strcmp(buffer, ".param")==0) {
 			printf("Parameter data\n");
 			buffer[6] = ' ';
-			param_l = temp_l;
+			param_pos = tmp_pos;
 			p_ch = buffer;
 			do {
-				if(memcmp(p_ch-7, "Lenline", 7)==0)
-					length_index = p_ch - buffer;
-				else if(memcmp(p_ch-4, "Cdrp", 4)==0)
-					cdrp_index = p_ch - buffer;
+				for(int n=3; n < num_step; n++) {
+					int length = strlen(step_name[n]);
+					if(memcmp(p_ch-length, "Lenline", length)==0)
+						ext_param_index[n-3] = p_ch - buffer;
+				}
 			} while(*(++p_ch));
 		} else if(strcmp(buffer, ".step")==0) {
-			if(p_tok[12] == 'R')
-				param_index = 0;
-			else if(p_tok[12] == 'L')
-				param_index = 1;	
-			else if(p_tok[12] == 'C')
-				param_index = 2;
-			else
-				printf("Error!\n");
+			strtok(buffer, " ");
+			p_tok = strtok(buffer, " ");
+			strcpy(step_name[num_step], p_tok);
 			data_index = 0;
 			while(p_tok!=NULL) {
 				p_end = p_tok;
@@ -184,21 +110,45 @@ int main(int argc, char* argv[])
 				} while(*(++p_ch));
 				tmp_data = strtof(str_fl, &p_end);
 				if (str_fl != p_end) {
-					step_param_data[param_index][data_index] = tmp_data;
+					step_data[num_step][data_index] = tmp_data;
 					data_index++;
 				}
 				p_tok = strtok(NULL, " ");
 			}
+			num_step++;
+			if(num_step > curr_size) {
+				curr_size = num_step + 3;
+				for(int i=0; i < 3; i++) {
+						step_data[i] = realloc(step_data[i], curr_size*sizeof(float));
+						if(!step_data[i]) {
+							printf("Could not realloc memory for step_data\n");
+							return 1;
+						}
+				}
+				step_name = realloc(step_name, curr_size*sizeof(char*));
+				for(int i=num_step; i < curr_size; i++)
+					step_name[i] = malloc(255*sizeof(char));
+				ext_param_index = realloc(ext_param_index, curr_size*sizeof(int));
+			}
 		}
 	}
-	/*
+	for(int i=0; i < num_step; i++) {
+		printf("%s\n", step_name[i]);
+		for(int j=0; j < 3; j++) 
+			printf("%e", step_data[j][i]);
+	}
+	for(int n=3; n < num_step; n++)
+		generate_step_array(step_data[0][n], step_data[1][n], step_data[2][n], ext_array[n]);
+
+/*
+
 	 * step one: run all ltspice netlists with varying parameters in length, cdrp and ac vs tran
 	 * 0: tran
 	 * 1: ac
-	 */
-	sprintf(cmd_ltspice, "./scad3.exe -b %s", file_name_cir);
+
+	sprintf(cmd_ltspice, "./scad3.exe -b %s", filename_in);
 	for(int i=0; i < 2; i++) {
-		tl_netlist = freopen(file_name_cir, "r+", tl_netlist);
+		tl_netlist = freopen(filename_in, "r+", tl_netlist);
 		printf("tl_netlist==NULL: %d\n", tl_netlist==NULL);
 		printf("ac_l: %ld, tran_l: %ld\n", ac_l, tran_l);
 		if(i == 0) { 
@@ -212,7 +162,7 @@ int main(int argc, char* argv[])
 					perror("Error in ac fseek");
 		}
 		fputc('.', tl_netlist);
-		/* put ';' to comment out the other analysis line */
+		* put ';' to comment out the other analysis line *
 		if(i == 0) {
 			if (fseek(tl_netlist, ac_l, SEEK_SET))
 					perror("Error in 2nd ac fseek");
@@ -223,7 +173,7 @@ int main(int argc, char* argv[])
 		}
 		fputc(';', tl_netlist);
 		for(int j=0; j < cdrp_array_size; j++) {
-			tl_netlist = freopen(file_name_cir, "r+", tl_netlist);
+			tl_netlist = freopen(filename_in, "r+", tl_netlist);
 			printf("\n");
 			if(fseek(tl_netlist, param_l, SEEK_SET))
 					perror("Error in cdrp param fseek");
@@ -232,7 +182,7 @@ int main(int argc, char* argv[])
 			p_ch = buffer + cdrp_index;
 			memcpy(p_ch+1, cdrp_str, strlen(cdrp_str));
 			for(int k=0; k < length_array_size; k++) {
-				tl_netlist = freopen(file_name_cir, "r+", tl_netlist);
+				tl_netlist = freopen(filename_in, "r+", tl_netlist);
 				expo_to_str(length_str, length_array[k]);
 				p_ch = buffer + length_index;
 				memcpy(p_ch+1, length_str, strlen(length_str));
@@ -249,9 +199,9 @@ int main(int argc, char* argv[])
 				rename("transmission_line.raw", file_name_out);
 			}
 		}
-	}		
-	free(length_array);
-	free(cdrp_array);
+	}
+*/
+	free(ext_array);
 	fclose(tl_netlist);
 	return 0;
 }
