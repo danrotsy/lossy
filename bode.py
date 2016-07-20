@@ -213,13 +213,13 @@ def genrange(interval, n):
 # ------------------------------------------------------------------------------
 # TESTING
 # ------------------------------------------------------------------------------
-# t,v,amp,freq = trans_fourier(r"C:\Users\HEP\Desktop\RC_tran_Vn002.csv", False)
-# transfer_func_inv = invert_transfer_function(r"C:\Users\HEP\Desktop\RC_ac_Vn002.csv",4096)
-# transfer_func = transfer_function(r"C:\Users\HEP\Desktop\RC_ac_Vn002.csv",4096)
+# t,v,amp,freq = trans_fourier(r"RCtest\RC_tran_Vn002.csv", False)
+# transfer_func_inv = invert_transfer_function(r"RCtest\RC_ac_Vn002.csv",4096)
+# transfer_func = transfer_function(r"RCtest\RC_ac_Vn002.csv",4096)
 #
-# t,v,amp,freq = trans_fourier(r"C:\Users\HEP\Desktop\RC_Vc_tran.csv", False)
-# transfer_func_inv = invert_transfer_function(r"C:\Users\HEP\Desktop\RC_Vc_ac.csv",4096)
-# transfer_func = transfer_function(r"C:\Users\HEP\Desktop\RC_Vc_ac.csv",4096)
+# t,v,amp,freq = trans_fourier(r"RCtest\RC_Vc_tran.csv", False)
+# transfer_func_inv = invert_transfer_function(r"RCtest\RC_Vc_ac.csv",4096)
+# transfer_func = transfer_function(r"RCtest\RC_Vc_ac.csv",4096)
 #
 # new_amp = apply_transfer_func(freq,amp,transfer_func_inv)
 #
