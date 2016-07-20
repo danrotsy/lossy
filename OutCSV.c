@@ -23,19 +23,6 @@ int main(int argc, char* argv[])
 	char* d = NULL;
 	FILE* waveform_in = NULL;
 	FILE* waveform_out = NULL;
-	DIR* waveform_out_dir = opendir(argv[1]);
-	if(waveform_out_dir)
-		closedir(waveform_out_dir);
-	else if(ENOENT==errno) {
-		if(mkdir(argv[1], S_IRWXU)==-1) {
-			printf("Could not create directory, exiting program...\n");
-			return 0;
-		}
-	}
-	else {
-		printf("An error has occurred in opening the directory %s", argv[1]);
-		return 0;
-	}
 	strcpy(file_name, argv[1]);
 	strcat(file_name, ".txt");
 	waveform_in = fopen(file_name, "r");
@@ -45,6 +32,8 @@ int main(int argc, char* argv[])
 		printf("Could not open file %s\n", file_name);
 		return 0;
 	}
+	strcpy(file_name+strlen(file_name)-3, "csv");
+	waveform_out = fopen(file_name, "w");
 	while(1) {
 		while(1) {
 			if(feof(waveform_in))
@@ -70,20 +59,6 @@ int main(int argc, char* argv[])
 			}
 			fprintf(waveform_out, "%s", buffer);
 		}
-		s = buffer;
-		d = buffer;
-		do while(*s == ',' || *s == '\n' || *s == '\r') s++; while(*d++ = *s++);
-		//remove '\n' and ',' character in buffer
-		strcat(buffer, ".csv");
-		strcpy(file_name, argv[1]);
-		strcat(file_name, "/");
-		strcat(file_name, buffer);
-		if(waveform_out)
-			fclose(waveform_out);
-		waveform_out = fopen(file_name, "w");
-		printf("Started new waveform_out file: %s\n", buffer);
-		fprintf(waveform_out, "%s\n", var_line);
-		//Step Information: Rline=400m Lline=79p Cline=220f  (Run: 11/200)
 	}
 exit:
 	fclose(waveform_out);
