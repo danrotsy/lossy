@@ -1,7 +1,13 @@
 import random
 
+# ==============================================================================
+# ------------------------------------------------------------------------------
+# Finding Closest Values
+# ------------------------------------------------------------------------------
+# finds the closest element given a list and value
 def find_closest(list_vals,val):
     '''
+    finds the closest element given a list and a value
     '''
     left, right, fill1, fill2 = find_closest_two()
     left = abs(val-left)
@@ -10,7 +16,7 @@ def find_closest(list_vals,val):
         return left
     else:
         return right
-
+# finds the values and indices to the left and right of a val in a list
 def find_closest_two(list_vals,val):
     '''
     if val is less than min(list_vals), returns min(list_vals) twice
@@ -20,7 +26,7 @@ def find_closest_two(list_vals,val):
     left, left_index = find_left(list_vals,val)
     right, right_index = find_right(list_vals,val)
     return left, right, left_index, right_index
-
+# finds the closest element on the left of a val given a list and the val
 def find_left(list_vals, val):
     '''
     there can only be one of each val in the list
@@ -49,7 +55,7 @@ def find_left(list_vals, val):
                     closest = l
                     closest_dist = dist
         return closest, list_vals.index(closest)
-
+# finds the closest element on the right of a val given a list and the val
 def find_right(list_vals,val):
     '''
     there can only be one of each val in the list
@@ -78,8 +84,18 @@ def find_right(list_vals,val):
                     closest = g
                     closest_dist = dist
         return closest, list_vals.index(closest)
+# ==============================================================================
 
+
+# ==============================================================================
+# ------------------------------------------------------------------------------
+# Test suite
+# ------------------------------------------------------------------------------
+# generates a random list of a given length and range
 def generate_random_list(length,min_val, max_val):
+    '''
+    generates a random list of a given length and range
+    '''
     index = 0
     rand_list = []
     while index != length:
@@ -88,8 +104,11 @@ def generate_random_list(length,min_val, max_val):
             rand_list.append(val)
             index += 1
     return rand_list
-
+# the test suite for num.py
 def test():
+    '''
+    the test suite for num.py
+    '''
     for i in range(0,100):
         min_val = random.randint(-10,-1)
         max_val = random.randint(1,10)
@@ -105,3 +124,4 @@ def test():
             print 'Failed ' ,test_list, left, val, right
         else:
             print 'Success' ,test_list, left, val, right
+# ==============================================================================
