@@ -1,5 +1,16 @@
 import random
 
+def find_closest(list_vals,val):
+    '''
+    '''
+    left, right, fill1, fill2 = find_closest_two()
+    left = abs(val-left)
+    right = abs(val-left)
+    if left <= right:
+        return left
+    else:
+        return right
+
 def find_closest_two(list_vals,val):
     '''
     if val is less than min(list_vals), returns min(list_vals) twice
