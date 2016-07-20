@@ -4,22 +4,30 @@ import cmath
 import math
 import matplotlib.pyplot as plt
 
+# applies a filter to a frequency amplitude domain
 def apply_transfer_func(freq,amp,transfer_func): #freq,amp,transfer_func
     '''
+    applies a filter to a frequency amplitude domain
     '''
-    new_amp = [] # can this be a list?
+    new_amp = []
     for i in range(0,len(amp)):
         current_freq = freq[i]
+        # if freq < 0, negate angle (for conjugate)
         if current_freq < 0:
+            # get the attenuation from the transfer function
             attenuation = get_val(transfer_func[0],transfer_func[1],abs(current_freq))
+            # get the negative of the transfer funciton's angle
             angle = -(get_val(transfer_func[0],transfer_func[2],abs(current_freq)))
+        # if freq >= 0, leave angle the same
         else:
+            # get the attenuation from the transfer function
             attenuation = get_val(transfer_func[0],transfer_func[1],current_freq)
+            # get the transfer funciton's angle
             angle = (get_val(transfer_func[0],transfer_func[2],current_freq))
-        #print 'angle', angle
+        # convert angle to complex number
         phase_shift = cmath.exp(complex(0,math.radians(angle)))
-        print 'f:',current_freq, ',','att:',attenuation,',','phi:', angle,',',phase_shift
-        new_amp.append(attenuation*phase_shift*amp[i]) # *attenuation *phase_shift
+        # apply attenuation and phase shift to old amp to get new amp
+        new_amp.append(attenuation*phase_shift*amp[i])
     return new_amp
 
 # returns the inverse transfer function of a file at a given resolution
@@ -27,6 +35,7 @@ def invert_transfer_function(file_path,res):
     '''
     generates the inverse transfer function over a frequency domain given the file_path and res (resolution)
     '''
+    # opens file
     with open(file_path, 'r') as file:
         data = file.readlines()
 
@@ -36,16 +45,18 @@ def invert_transfer_function(file_path,res):
         if len(line)>2:
             line_split = line[:-1]
             line_split = line_split.split(',')
+            # convert from dB to 1/H. 1/H = 10^(-dB/20)
             line_split[1] = pow(10,(float(line_split[1])/-20.0))
+            # negate angle
             line_split[2] = float(line_split[2])*(-1.0)
+            # add frequency in first slot
             transfer_func_inv[0].append(float(line_split[0]))
+            # add 1/H in second slot
             transfer_func_inv[1].append(line_split[1])
+            # add negated angle in third slot
             transfer_func_inv[2].append(line_split[2])
+            # new line if method for saving transfer functions is added
             line = str(line_split[0]) + ',' + str(line_split[1]) + ',' + str(line_split[2]) + r'\n'
-
-    # freq_filled, mag_filled = fill_func(transfer_func_inv[0],transfer_func_inv[1],res)
-    # place_holder, phase_filled = fill_func(transfer_func_inv[0],transfer_func_inv[2],res)
-    # transfer_func_inv_filled = [freq_filled,mag_filled,phase_filled]
 
     return transfer_func_inv
 
@@ -54,6 +65,7 @@ def transfer_function(file_path,res):
     '''
     generates the transfer function of a frequency domain given the file_path and res (resolution)
     '''
+    # opens file
     with open(file_path, 'r') as file:
         data = file.readlines()
 
@@ -63,15 +75,16 @@ def transfer_function(file_path,res):
         if len(line)>2:
             line_split = line[:-1]
             line_split = line_split.split(',')
+            # convert from dB to H. H = 10^(dB/20)
             line_split[1] = pow(10,(float(line_split[1])/20.0))
+            # add frequency in first slot
             transfer_function[0].append(float(line_split[0]))
+            # add H in second slot
             transfer_function[1].append(line_split[1])
+            # add angle in third slot
             transfer_function[2].append(float(line_split[2]))
+            # new line if method for saving transfer functions is added
             line = str(line_split[0]) + ',' + str(line_split[1]) + ',' + str(line_split[2]) + r'\n'
-
-    # freq_filled, mag_filled = fill_func(transfer_function[0],transfer_function[1],res)
-    # place_holder, phase_filled = fill_func(transfer_function[0],transfer_function[2],res)
-    # transfer_function_filled = [freq_filled,mag_filled,phase_filled]
 
     return transfer_function
 
@@ -104,7 +117,6 @@ def get_val(func_x,func_y,x_in):
         left,right,left_index,right_index = num.find_closest_two(func_x,x_in)
         deltav = float(func_y[right_index]) - float(func_y[left_index])
         deltat = float(right) - float(left)
-        # print deltat, x_in, ((x_in-func_x[left_index])/deltat), func_y[left_index], deltav, deltav*((x_in-func_x[left_index])/deltat)+func_y[left_index]
         if deltat < 1:
             return float(func_y[left_index])
         return deltav*((x_in-func_x[left_index])/deltat)+func_y[left_index]
@@ -130,20 +142,17 @@ def trans_fourier(file_path, shift):
             vnew.append(v[left_index])
         else:
             vnew.append(deltav*((val-t[left_index])/deltat)+v[left_index])
-        # print val,left, right, trel
-    # print t
-    # plt.plot(t, v, color='blue', linestyle='-')
     amp = np.fft.fft(vnew)
     freq = np.fft.fftfreq(4096,(1e-7/4096.0))
     if shift:
-        freq = np.fft.fftshift(freq) # is this necessary?
-    # plt.plot(freq, np.absolute(amp)**2, color='red', linestyle='-')
-    # plt.plot(freq, amp.real, color='red', linestyle='-')
-    # plt.plot(freq, amp.imag, color='blue', linestyle='-')
-    # plt.show()
+        freq = np.fft.fftshift(freq)
     return t,v,amp,freq
 
+# combines amplitudes across different frequencies and applies them to the time domain
 def inv_fourier(freq,amp):
+    '''
+    returns the inverse fourier transform
+    '''
     return np.fft.ifft(amp)
 
 # returns a range of floats
@@ -162,38 +171,30 @@ def genrange(interval, n):
         cur += inc
     return r
 
-t,v,amp,freq = trans_fourier(r"C:\Users\HEP\Desktop\RC_tran_Vn002.csv", False)
-transfer_func_inv = invert_transfer_function(r"C:\Users\HEP\Desktop\RC_ac_Vn002.csv",4096)
-transfer_func = transfer_function(r"C:\Users\HEP\Desktop\RC_ac_Vn002.csv",4096)
-
-new_amp = apply_transfer_func(freq,amp,transfer_func_inv)
-# print type(amp),type(new_amp)
-# print len(t),len(new_amp)
-# for i in range(0,len(amp)):
-#     print freq[i],amp[i]
-new_v = inv_fourier(freq, new_amp)
-
-# for i in range(0, len(transfer_func[0])):
-#     print_tuple = (round(transfer_func[0][i],4),
-#                     "amp:", round(transfer_func[1][i],4),round(transfer_func_inv[1][i],4),
-#                     round(transfer_func[1][i]*transfer_func_inv[1][i],4),
-#                     "phase:",round(transfer_func[2][i],4),round(transfer_func_inv[2][i],4),
-#                     round(transfer_func[2][i]+transfer_func_inv[2][i],4))
-#     print_string = ''
-#     for entry in print_tuple:
-#         print_string += str(entry) + ','
-#     print print_string
-
-# print get_val(transfer_func_inv[0],transfer_func_inv[1], 4.4e8)
-
-plt.subplot(2,1,1)
-plt.plot(genrange(1e-7,len(new_v)),new_v.real,color='red',linestyle='-')
-plt.plot(t,v,color='blue',linestyle='-')
-
-plt.subplot(2,1,2)
-plt.plot(transfer_func[0],transfer_func[1],color='red',linestyle='-')
-plt.plot(transfer_func[0],transfer_func[2],color='red',linestyle='-')
-plt.plot(transfer_func_inv[0],transfer_func_inv[1],color='blue',linestyle='-')
-plt.plot(transfer_func_inv[0],transfer_func_inv[2],color='blue',linestyle='-')
-
-plt.show()
+# ==============================================================================
+#                                   TESTING
+# ==============================================================================
+# t,v,amp,freq = trans_fourier(r"C:\Users\HEP\Desktop\RC_tran_Vn002.csv", False)
+# transfer_func_inv = invert_transfer_function(r"C:\Users\HEP\Desktop\RC_ac_Vn002.csv",4096)
+# transfer_func = transfer_function(r"C:\Users\HEP\Desktop\RC_ac_Vn002.csv",4096)
+#
+# t,v,amp,freq = trans_fourier(r"C:\Users\HEP\Desktop\RC_Vc_tran.csv", False)
+# transfer_func_inv = invert_transfer_function(r"C:\Users\HEP\Desktop\RC_Vc_ac.csv",4096)
+# transfer_func = transfer_function(r"C:\Users\HEP\Desktop\RC_Vc_ac.csv",4096)
+#
+# new_amp = apply_transfer_func(freq,amp,transfer_func_inv)
+#
+# new_v = inv_fourier(freq, new_amp)
+#
+#
+# plt.subplot(2,1,1)
+# plt.plot(genrange(1e-7,len(new_v)),new_v.real,color='red',linestyle='-')
+# plt.plot(t,v,color='blue',linestyle='-')
+#
+# plt.subplot(2,1,2)
+# plt.plot(transfer_func[0],transfer_func[1],color='red',linestyle='-')
+# plt.plot(transfer_func[0],transfer_func[2],color='red',linestyle='-')
+# plt.plot(transfer_func_inv[0],transfer_func_inv[1],color='blue',linestyle='-')
+# plt.plot(transfer_func_inv[0],transfer_func_inv[2],color='blue',linestyle='-')
+#
+# plt.show()
