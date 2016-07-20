@@ -24,7 +24,7 @@ except ImportError:
 
 from numpy import arange
 
-import bode_rename as br
+import bode
 # ==============================================================================
 
 
@@ -177,6 +177,9 @@ class MainMenu(Frame):
     def gui_to_vals(self):
         self.errormsgvar.set('')
         out = []
+        title = ''
+        x_axis_title = ''
+        y_axis_title = ''
         if self.rlockvar.get():
             r = []
             r.append(self.findClosest(self.Rvals, self.rscale.get()))
@@ -239,8 +242,12 @@ class MainMenu(Frame):
         atype = ''
         if self.var.get() == 'Bode':
             atype = 'ac'
+            x_axis_title = 'Frequency(Hz)'
+            y_axis_title = 'Gain(dB)'
         if self.var.get() == 'Transient':
             atype = 'trans'
+            x_axis_title = 'Time(s)'
+            y_axis_title = 'Voltage(V)'
         out.append(atype)
         self.plot = False
         todo = []
@@ -258,7 +265,34 @@ class MainMenu(Frame):
             instruction[2] = (color,0,1-color)
             instructions.append(instruction)
             color+=color_step
-        self.new_figure('Test', instructions)
+        title = self.var.get().upper() + ' ' + signal.upper() + '\n'+ 'Cdrp=' + str(self.cdscale.get())  + 'p  ' + self.get_name_tag()
+        self.new_figure(title, instructions, x_axis_title, y_axis_title)
+    # returns r,l,c description for title
+    def get_name_tag(self):
+        '''
+        makes a r,l,c description for plot title from the GUI
+        '''
+        const = []
+        var = []
+        if self.rlockvar.get():
+            const.append('R=' + self.rlabelvar.get() + 'Ohm ')
+        else:
+            var.append('R ')
+        if self.llockvar.get():
+            const.append('L=' + self.llabelvar.get() + 'H ')
+        else:
+            var.append('L ')
+        if self.clockvar.get():
+            const.append('C=' + self.clabelvar.get() + 'F ')
+        else:
+            var.append('C ')
+        tag = ''
+        for c in const:
+            tag += c + '  '
+        tag += 'Var: '
+        for v in var:
+            tag += v + '  '
+        return tag
     # returns a float of the same value as the original scientific notation
     def sciToFloat(self, sci_string):
         '''
@@ -374,19 +408,21 @@ class MainMenu(Frame):
     # Plotting Functionality
     # --------------------------------------------------------------------------
     # generates new figure and shows it
-    def new_figure(self, title,plot_info):
+    def new_figure(self, title, plot_info, x_axis_title, y_axis_title):
         '''
         title:      plot
         plot_info:  list of lists: [[r'file_path1', name1, plot_color1], [r'file_path2', name2, plot_color2], ... ]
+        x_axis_title: title on x axis
+        y_axis_title: title on y axis
 
         generates new figure and shows it
         '''
         fig = self.create_new_figure(title)
         for i in plot_info:
-            self.plot_file(fig, i[0], i[1], i[2])
+            self.plot_file(fig, i[0], i[1], i[2], x_axis_title, y_axis_title)
         plt.show()
     # adds a file to the figure as a plot
-    def plot_file(self, fig,file_path,name,plot_color):
+    def plot_file(self, fig,file_path, name, plot_color, x_axis_title, y_axis_title):
         '''
         fig:        figure which plot will be on
         file_path:  r'(file directory)'
@@ -394,12 +430,14 @@ class MainMenu(Frame):
         plot_color: '(a valid color)' (blue, green, red, cyan, magenta, yellow, black, white)
                     RGB tuple (0,1,0)
                     Hexstring ('#008000')
+        x_axis_title: title on x axis
+        y_axis_title: title on y axis
 
         plots a file as a line on a given figure
         '''
         ax = fig.add_subplot(111)
-        ax.set_xlabel('Time(s)')
-        ax.set_ylabel('Voltage(V)')
+        ax.set_xlabel(x_axis_title)
+        ax.set_ylabel(y_axis_title)
         data = np.genfromtxt(file_path, delimiter=',', names=['t', name])
         ax.plot(data['t'], data[name], color=plot_color, linestyle='-') #, label=name
     # instantiates a new figure for new plots
