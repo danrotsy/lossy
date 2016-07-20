@@ -9,20 +9,41 @@
 
 int main(int argc, char* argv[])
 {
+	/*
+	 * The one command-line argument given
+	 * is the netlist / circuit file for
+	 * spice to simulate with parameters 
+	 * stepped as provided in netlist file.
+	 * the .step directives MUST be commented
+	 * out though, or else ltsputil will mess
+	 * up the CSV files outputted. If not enough
+	 * arguments are given, exit immediately
+	 * or else argv[1] will be undefined
+	 */
 	if(argc < 2) {
 		printf("Insufficient number of command-line arguments\n");
 		return 1;
 	}
+	FILE* tl_netlist = fopen(filename_in, "r+");
+	if(!tl_netlist) {
+		printf("Error in Opening Spice file, %s: %s\n", filename_in, strerror(errno));
+		return 1;
+	}
+	struct params run;
+	initialize_params(&run);
+	
 	char filename_in[255];
 	strcpy(filename_in, argv[1]);
+	
 	char cmd_ltspice[255];
-	char cmd_ltsputil[255];
-	char filename_out[17];
+	sprintf(cmd_ltspice, "./scad3.exe -b %s", filename_in);
+	
+	char filename_out[255];
+	char filename_raw[255];
+	char filename_buffer[255];
 	char buffer[255];
 	char str_fl[20];
-	char cdrp_str[20];
-	char length_str[20];
-
+	
 	long tran_pos;
 	long ac_pos;
 	long param_pos;
@@ -31,38 +52,26 @@ int main(int argc, char* argv[])
 	char *p_ch;
 	char *p_tok;
 	char *p_end;
-
-	char **step_name;
-	float *step_data[3];
-	int num_step = 3;
-	int curr_size = 3;
-	for(int n=0; n < 3; n++)
-		step_data[n] = malloc(curr_size*sizeof(float));
-	step_name = malloc(curr_size*sizeof(char*));
-	for(int i=0; i < curr_size; i++) 
-		step_name[i] = malloc(255*sizeof(char));
+		
 	int param_index = 0;
 	int data_index = 0;
-	int *ext_param_index = malloc(curr_size*sizeof(int));
 	
 	float tmp_data = 0;
-	
-	float length_low = 1;
-	float length_high = 10;
-	float length_step = 1;
-	
-	float cdrp_low = 1E-12;
-	float cdrp_high = 5E-12;
-	float cdrp_step = 1E-12;
 
-	float **ext_array;
-	
 	FILE* tl_csv;
-	FILE* tl_netlist = fopen(filename_in, "r+");
-	if(!tl_netlist) {
-		printf("Error in Opening Spice file, %s: %s\n", filename_in, strerror(errno));
-		return 0;
-	}
+	/*
+	 * Loop through the input file looking
+	 * for the lines that specify .tran, .ac, 
+	 * .param and .step spice directives
+	 * After determining if the current line
+	 * is any of one of those, the file stream
+	 * "cursor" is saved specifying which directive
+	 * was on that line. For the .param line the char
+	 * index of each stepped variable is saved, as to
+	 * sub in the new values each simualation run,
+	 * so the .param line MUST come after the .step
+	 * param directives in the input file
+	 */
 	while(!feof(tl_netlist)) {
 		tmp_pos = ftell(tl_netlist);
 		fgets(buffer, 255, tl_netlist);
@@ -80,20 +89,25 @@ int main(int argc, char* argv[])
 			buffer[6] = ' ';
 			param_pos = tmp_pos;
 			p_ch = buffer;
+			/*
+			 * This loop 
 			do {
-				for(int n=3; n < num_step; n++) {
-					int length = strlen(step_name[n]);
-					if(memcmp(p_ch-length, "Lenline", length)==0)
-						ext_param_index[n-3] = p_ch - buffer;
+				for(int n=0; n < run.num_param; n++) {
+					int length = strlen(run.ext_param_name[n]);
+					if(memcmp(p_ch-length, run.ext_param_name[n], length)==0)
+						run.ext_param_index[n] = p_ch - buffer;
 				}
 			} while(*(++p_ch));
-		} else if(strcmp(buffer, ".step")==0) {
-			strtok(buffer, " ");
-			p_tok = strtok(buffer, " ");
-			strcpy(step_name[num_step], p_tok);
+		} else if(strcmp(buffer+1, "step")==0) {
+			strtok(NULL, " ");
+			p_tok = strtok(NULL, " ");
+			printf("Strcpy %s into run.ext_param_name[%d]\n", p_tok, run.num_param);
+			printf("Current size: %d\n", run.curr_size);
+			strcpy(run.ext_param_name[run.num_param], p_tok);
 			data_index = 0;
 			while(p_tok!=NULL) {
 				p_end = p_tok;
+				printf("Strcpy p_tok: %s into str_fl...\n", p_tok);
 				strcpy(str_fl, p_tok);
 				p_ch = str_fl;
 				do {
@@ -110,98 +124,117 @@ int main(int argc, char* argv[])
 				} while(*(++p_ch));
 				tmp_data = strtof(str_fl, &p_end);
 				if (str_fl != p_end) {
-					step_data[num_step][data_index] = tmp_data;
+					run.ext_param_step_array[run.num_param][data_index] = tmp_data;
 					data_index++;
 				}
 				p_tok = strtok(NULL, " ");
 			}
-			num_step++;
-			if(num_step > curr_size) {
-				curr_size = num_step + 3;
-				for(int i=0; i < 3; i++) {
-						step_data[i] = realloc(step_data[i], curr_size*sizeof(float));
-						if(!step_data[i]) {
-							printf("Could not realloc memory for step_data\n");
-							return 1;
-						}
-				}
-				step_name = realloc(step_name, curr_size*sizeof(char*));
-				for(int i=num_step; i < curr_size; i++)
-					step_name[i] = malloc(255*sizeof(char));
-				ext_param_index = realloc(ext_param_index, curr_size*sizeof(int));
+			run.num_param++;
+			if(run.num_param >= run.curr_size) {
+				run.curr_size = run.num_param + 3;
+				printf("Reallocate param memory...\n");
+				realloc_params(&run);
 			}
 		}
 	}
-	for(int i=0; i < num_step; i++) {
-		printf("%s\n", step_name[i]);
+	for(int i=0; i < run.num_param; i++) {
+		printf("\n%s\n", run.ext_param_name[i]);
 		for(int j=0; j < 3; j++) 
-			printf("%e", step_data[j][i]);
+			printf("%e ", run.ext_param_step_array[i][j]);
 	}
-	for(int n=3; n < num_step; n++)
-		generate_step_array(step_data[0][n], step_data[1][n], step_data[2][n], ext_array[n]);
-
-/*
-
+	printf("\n");
+	
+	for(int n=0; n < run.num_param; n++)
+		run.ext_param_curr[n] = run.ext_param_step_array[n][0];
+	
+	printf("Generating data arrays for .step params...\n");
+	for(int n=0; n < run.num_param; n++)
+		generate_data_array(run.ext_param_step_array[n][0], run.ext_param_step_array[n][1], run.ext_param_step_array[n][2], run.ext_param_data_array[n]);
+	
+	unsigned int num_perm = 1;
+	printf("Generating the number of run.ext_param_permutations for .step params...\n");
+	for(int n=0; n < run.num_param; n++) {
+		num_perm *= (unsigned int)((run.ext_param_step_array[n][1]-run.ext_param_step_array[n][0])/run.ext_param_step_array[n][2]+1);
+	}
+	printf("Allocating memory for an array of size %u with float* to store run.ext_param_permutations...\n", num_perm);
+	run.ext_param_permutations = malloc(num_perm*sizeof(float*));
+	if(!run.ext_param_permutations)
+		printf("Not enough memory to allocate run.ext_param_permutations array\n");
+	
+	for(unsigned int i=0; i < num_perm; i++) {
+		run.ext_param_permutations[i] = malloc(run.num_param*sizeof(float));
+		for(int j=0; j < run.num_param; j++) {
+			run.ext_param_permutations[i][j] = run.ext_param_curr[j];
+		}
+		update_run(&run);
+	}
+	for(int n=0; n < run.num_param; n++)
+		run.ext_param_curr[n] = run.ext_param_step_array[n][0];
+	
+	printf("Number of run.ext_param_permutations: %d\n", num_perm);
+	
+	/*
 	 * step one: run all ltspice netlists with varying parameters in length, cdrp and ac vs tran
 	 * 0: tran
 	 * 1: ac
-
+	 */
 	sprintf(cmd_ltspice, "./scad3.exe -b %s", filename_in);
+	strcpy(filename_raw, filename_in);
+	strcpy(filename_raw+strlen(filename_raw)-3, "raw");
+	
 	for(int i=0; i < 2; i++) {
 		tl_netlist = freopen(filename_in, "r+", tl_netlist);
 		printf("tl_netlist==NULL: %d\n", tl_netlist==NULL);
-		printf("ac_l: %ld, tran_l: %ld\n", ac_l, tran_l);
+		printf("ac_pos: %ld, tran_pos: %ld\n", ac_pos, tran_pos);
 		if(i == 0) { 
 			printf("\nBeginning transient analysis...\n");
-			if(fseek(tl_netlist, tran_l, SEEK_SET))
+			if(fseek(tl_netlist, tran_pos, SEEK_SET))
 					perror("Error in tran fseek");
 		}
 		else if(i == 1) { 
 			printf("\nBeginning ac analysis...\n");
-			if(fseek(tl_netlist, ac_l, SEEK_SET))
+			if(fseek(tl_netlist, ac_pos, SEEK_SET))
 					perror("Error in ac fseek");
 		}
 		fputc('.', tl_netlist);
-		* put ';' to comment out the other analysis line *
+		/* put ';' to comment out the other analysis line */
 		if(i == 0) {
-			if (fseek(tl_netlist, ac_l, SEEK_SET))
+			if (fseek(tl_netlist, ac_pos, SEEK_SET))
 					perror("Error in 2nd ac fseek");
 		}
 		else if(i == 1) {
-			if (fseek(tl_netlist, tran_l, SEEK_SET))
+			if (fseek(tl_netlist, tran_pos, SEEK_SET))
 					perror("Error in 2nd tran fseek");
 		}
 		fputc(';', tl_netlist);
-		for(int j=0; j < cdrp_array_size; j++) {
+		for(unsigned int j=0; j < num_perm; j++) {
 			tl_netlist = freopen(filename_in, "r+", tl_netlist);
 			printf("\n");
-			if(fseek(tl_netlist, param_l, SEEK_SET))
-					perror("Error in cdrp param fseek");
+			if(fseek(tl_netlist, param_pos, SEEK_SET))
+				perror("Error in param fseek");
 			fgets(buffer, 255, tl_netlist);
-			expo_to_str(cdrp_str, cdrp_array[j]);
-			p_ch = buffer + cdrp_index;
-			memcpy(p_ch+1, cdrp_str, strlen(cdrp_str));
-			for(int k=0; k < length_array_size; k++) {
-				tl_netlist = freopen(filename_in, "r+", tl_netlist);
-				expo_to_str(length_str, length_array[k]);
-				p_ch = buffer + length_index;
-				memcpy(p_ch+1, length_str, strlen(length_str));
-				printf("Buffer: %s", buffer);
-				printf("param_l: %ld\n", param_l);
-				if(fseek(tl_netlist, param_l, SEEK_SET))
-					perror("Error in len param fseek");
-				fputs(buffer, tl_netlist);
-				if(fclose(tl_netlist))
-					perror("Error in closing file");
-				sprintf(file_name_out, "%s_cdrp=%s_len%s.raw", i ? "ac" : "tran", cdrp_str, length_str);
-				printf("Raw file: %s\n", file_name_out);
-				system("./scad3.exe -b transmission_line.cir");
-				rename("transmission_line.raw", file_name_out);
+			param_expo_to_str(&run, j);
+			for(int k=0; k < run.num_param; k++) {
+				p_ch = buffer + run.ext_param_index[k];
+				memcpy(p_ch+1, run.ext_param_str[k], strlen(run.ext_param_str[k]));
 			}
+			printf("Completed buffer: %s", buffer);
+			if(fseek(tl_netlist, param_pos, SEEK_SET))
+				perror("Error in second param fseek");
+			fputs(buffer, tl_netlist);
+			if(fclose(tl_netlist))
+				perror("Error in closing file");
+			sprintf(filename_out, "%s", i ? "ac" : "tran");
+			for(int n=0; n < run.num_param; n++) {
+				sprintf(filename_buffer, "_%s=%s", run.ext_param_name[n], run.ext_param_str[n]);
+				strcat(filename_out, filename_buffer);
+			}
+			strcat(filename_out, ".raw");
+			printf("Raw file: %s\n", filename_out);
+			system(cmd_ltspice);
+			rename(filename_raw, filename_out);
 		}
 	}
-*/
-	free(ext_array);
 	fclose(tl_netlist);
 	return 0;
 }
