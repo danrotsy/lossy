@@ -1,11 +1,40 @@
-import numpy as np
-import num as num
-import cmath
-import math
-import matplotlib.pyplot as plt
+# ==============================================================================
+# ------------------------------------------------------------------------------
+# Imports
+# ------------------------------------------------------------------------------
+try:
+    import numpy as np
+except ImportError:
+    print 'the "numpy" library is required for this application'
 
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    print 'the "matplotlib" library is required for this application'
+
+try:
+    import cmath
+except ImportError:
+    print 'the "cmath" library is required for this application'
+
+try:
+    import math
+except ImportError:
+    print 'the "math" library is required for this application'
+
+try:
+    import num as num
+except ImportError:
+    print 'cannot find "num.py" in application directory'
+# ==============================================================================
+
+
+# ==============================================================================
+# ------------------------------------------------------------------------------
+# Transfer Functions
+# ------------------------------------------------------------------------------
 # applies a filter to a frequency amplitude domain
-def apply_transfer_func(freq,amp,transfer_func): #freq,amp,transfer_func
+def apply_transfer_func(freq,amp,transfer_func):
     '''
     applies a filter to a frequency amplitude domain
     '''
@@ -29,8 +58,7 @@ def apply_transfer_func(freq,amp,transfer_func): #freq,amp,transfer_func
         # apply attenuation and phase shift to old amp to get new amp
         new_amp.append(attenuation*phase_shift*amp[i])
     return new_amp
-
-# returns the inverse transfer function of a file at a given resolution
+# returns the invert_transfer_function of a file at a given resolution
 def invert_transfer_function(file_path,res):
     '''
     generates the inverse transfer function over a frequency domain given the file_path and res (resolution)
@@ -59,7 +87,6 @@ def invert_transfer_function(file_path,res):
             line = str(line_split[0]) + ',' + str(line_split[1]) + ',' + str(line_split[2]) + r'\n'
 
     return transfer_func_inv
-
 # returns the transfer funciton of a file at a give resolution
 def transfer_function(file_path,res):
     '''
@@ -87,40 +114,13 @@ def transfer_function(file_path,res):
             line = str(line_split[0]) + ',' + str(line_split[1]) + ',' + str(line_split[2]) + r'\n'
 
     return transfer_function
+# ==============================================================================
 
-# returns a constrained jump set of a function (represented the sets x1 and x2) over a given resolution
-def fill_func(x1,x2,n):
-    '''
-    generates a constrained jump set of a function (represented the sets x1 and x2) over a given resolution
-    '''
-    rng = max(x1)-min(x1)
-    xnew = genrange(max(x1)-(rng/float(n)),n)
-    ynew = []
-    for val in xnew:
-        left,right,left_index,right_index = num.find_closest_two(x1,val)
-        deltav = float(x2[right_index]) - float(x2[left_index])
-        deltat = float(right) - float(left)
-        if deltat == 0:
-            ynew.append(x2[left_index])
-        else:
-            ynew.append(deltav*((val-x1[left_index])/deltat)+x2[left_index])
-    return xnew, ynew
 
-# returns the value of a set function at a value undefined over the set's limited domain
-def get_val(func_x,func_y,x_in):
-    '''
-    given a set represented function, returns the best approximation for a val in its undefined domain
-    '''
-    if x_in > max(func_x):
-        return func_y[-1]
-    else:
-        left,right,left_index,right_index = num.find_closest_two(func_x,x_in)
-        deltav = float(func_y[right_index]) - float(func_y[left_index])
-        deltat = float(right) - float(left)
-        if deltat < 1:
-            return float(func_y[left_index])
-        return deltav*((x_in-func_x[left_index])/deltat)+func_y[left_index]
-
+# ==============================================================================
+# ------------------------------------------------------------------------------
+# Fourier
+# ------------------------------------------------------------------------------
 # returns the amplitude and frequency of a transient plot, with or without shift
 def trans_fourier(file_path, shift):
     '''
@@ -147,14 +147,50 @@ def trans_fourier(file_path, shift):
     if shift:
         freq = np.fft.fftshift(freq)
     return t,v,amp,freq
-
 # combines amplitudes across different frequencies and applies them to the time domain
 def inv_fourier(freq,amp):
     '''
     returns the inverse fourier transform
     '''
     return np.fft.ifft(amp)
+# ==============================================================================
 
+
+# ==============================================================================
+# ------------------------------------------------------------------------------
+# Linear Interpolation
+# ------------------------------------------------------------------------------
+# returns a constrained jump set of a function (represented the sets x1 and x2) over a given resolution
+def fill_func(x1,x2,n):
+    '''
+    generates a constrained jump set of a function (represented the sets x1 and x2) over a given resolution
+    '''
+    rng = max(x1)-min(x1)
+    xnew = genrange(max(x1)-(rng/float(n)),n)
+    ynew = []
+    for val in xnew:
+        left,right,left_index,right_index = num.find_closest_two(x1,val)
+        deltav = float(x2[right_index]) - float(x2[left_index])
+        deltat = float(right) - float(left)
+        if deltat == 0:
+            ynew.append(x2[left_index])
+        else:
+            ynew.append(deltav*((val-x1[left_index])/deltat)+x2[left_index])
+    return xnew, ynew
+# returns the value of a set function at a value undefined over the set's limited domain
+def get_val(func_x,func_y,x_in):
+    '''
+    given a set represented function, returns the best approximation for a val in its undefined domain
+    '''
+    if x_in > max(func_x):
+        return func_y[-1]
+    else:
+        left,right,left_index,right_index = num.find_closest_two(func_x,x_in)
+        deltav = float(func_y[right_index]) - float(func_y[left_index])
+        deltat = float(right) - float(left)
+        if deltat < 1:
+            return float(func_y[left_index])
+        return deltav*((x_in-func_x[left_index])/deltat)+func_y[left_index]
 # returns a range of floats
 def genrange(interval, n):
     '''
@@ -170,10 +206,13 @@ def genrange(interval, n):
         r.append(cur)
         cur += inc
     return r
+# ==============================================================================
+
 
 # ==============================================================================
-#                                   TESTING
-# ==============================================================================
+# ------------------------------------------------------------------------------
+# TESTING
+# ------------------------------------------------------------------------------
 # t,v,amp,freq = trans_fourier(r"C:\Users\HEP\Desktop\RC_tran_Vn002.csv", False)
 # transfer_func_inv = invert_transfer_function(r"C:\Users\HEP\Desktop\RC_ac_Vn002.csv",4096)
 # transfer_func = transfer_function(r"C:\Users\HEP\Desktop\RC_ac_Vn002.csv",4096)
@@ -198,3 +237,4 @@ def genrange(interval, n):
 # plt.plot(transfer_func_inv[0],transfer_func_inv[2],color='blue',linestyle='-')
 #
 # plt.show()
+# ==============================================================================

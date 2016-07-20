@@ -22,9 +22,12 @@ try:
 except ImportError:
     print 'the "ttk" library is required for this application'
 
-from numpy import arange
+try:
+    import bode
+except:
+    print 'cannot find "bode.py" in application directory'
 
-import bode
+from numpy import arange
 # ==============================================================================
 
 
