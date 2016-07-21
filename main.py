@@ -271,7 +271,7 @@ class MainMenu(Frame):
                     for a in out[5]:
                         todo.append(((r,l,c),out[3],signal,a))
         instructions = []
-        title = self.var.get().upper() + ' ' + signal.upper() + '\n'+ 'Cdrp=' + str(self.cdscale.get())  + '  ' + self.get_name_tag()
+        title = self.var.get().upper() + ' ' + signal.upper() + '\n'+ 'Cdrp=' + str(self.cdlabelvar.get())  + '  ' + self.get_name_tag()
         if to_process == False:
             color_step = 1.0/len(todo)
             color = 0
