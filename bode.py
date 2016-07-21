@@ -119,10 +119,33 @@ def transfer_function(file_path,res):
 
 # ==============================================================================
 # ------------------------------------------------------------------------------
+# Filters
+# ------------------------------------------------------------------------------
+# high pass filter
+def high_pass_filter(bot_freq, top_freq):
+    '''
+    highpass filter         (top_freq) /--------------- 1.0
+                                      /
+                    0.0 -------------/ (bot_freq)
+    '''
+    return [[0.0,bot_freq,top_freq,1.0e15],[0.0,0.0,1.0,1.0],[0.0,0.0,0.0,0.0]]
+# low pass filter
+def low_pass_filter(top_freq,bot_freq):
+    '''
+    lowpass filter  1.0 -------------\ (top_freq)
+                                      \
+                            (bot_freq) \--------------- 0.0
+    '''
+    return [[0.0,top_freq,bot_freq,1.0e15],[1.0,1.0,0.0,0.0],[0.0,0.0,0.0,0.0]]
+# ==============================================================================
+
+
+# ==============================================================================
+# ------------------------------------------------------------------------------
 # Fourier
 # ------------------------------------------------------------------------------
 # returns the amplitude and frequency of a transient plot, with or without shift
-def trans_fourier(file_path, shift):
+def trans_fourier(file_path, shift, res):
     '''
     returns the amplitude and frequency of a transient plot, with or without shift
     '''
@@ -132,7 +155,7 @@ def trans_fourier(file_path, shift):
     for datum in data[1:]:
         t.append(datum[0])
         v.append(datum[1])
-    tnew = genrange(1e-7,4096)
+    tnew = genrange(1e-7,res)
     vnew = []
     for val in tnew:
         left,right,left_index,right_index = num.find_closest_two(t,val)
@@ -143,7 +166,7 @@ def trans_fourier(file_path, shift):
         else:
             vnew.append(deltav*((val-t[left_index])/deltat)+v[left_index])
     amp = np.fft.fft(vnew)
-    freq = np.fft.fftfreq(4096,(1e-7/4096.0))
+    freq = np.fft.fftfreq(res,(1e-7/float(res)))
     if shift:
         freq = np.fft.fftshift(freq)
     return t,v,amp,freq
@@ -213,15 +236,22 @@ def genrange(interval, n):
 # ------------------------------------------------------------------------------
 # TESTING
 # ------------------------------------------------------------------------------
-# t,v,amp,freq = trans_fourier(r"RCtest\RC_tran_Vn002.csv", False)
-# transfer_func_inv = invert_transfer_function(r"RCtest\RC_ac_Vn002.csv",4096)
-# transfer_func = transfer_function(r"RCtest\RC_ac_Vn002.csv",4096)
+# res = 4096
 #
-# t,v,amp,freq = trans_fourier(r"RCtest\RC_Vc_tran.csv", False)
-# transfer_func_inv = invert_transfer_function(r"RCtest\RC_Vc_ac.csv",4096)
-# transfer_func = transfer_function(r"RCtest\RC_Vc_ac.csv",4096)
+# t,v,amp,freq = trans_fourier(r"RCtest\RC_tran_Vn002.csv", False, res)
+# transfer_func_inv = invert_transfer_function(r"RCtest\RC_ac_Vn002.csv",res)
+# transfer_func = transfer_function(r"RCtest\RC_ac_Vn002.csv",res)
+#
+# t,v,amp,freq = trans_fourier(r"RCtest\RC_Vc_tran.csv", False, res)
+# transfer_func_inv = invert_transfer_function(r"RCtest\RC_Vc_ac.csv",res)
+# transfer_func = transfer_function(r"RCtest\RC_Vc_ac.csv",res)
+# low_pass_filter1 = low_pass_filter(3e8,5e8)
+# low_pass_filter2 = low_pass_filter(8e8,1e9)
+# print get_val(giga_hz_filter[0],giga_hz_filter[1],8.0e8)
 #
 # new_amp = apply_transfer_func(freq,amp,transfer_func_inv)
+# new_amp = apply_transfer_func(freq,new_amp,transfer_func_inv)
+# new_amp = apply_transfer_func(freq,new_amp,low_pass_filter2)
 #
 # new_v = inv_fourier(freq, new_amp)
 #

@@ -62,7 +62,6 @@ class MainMenu(Frame):
         self.C_step = self.sciToFloat("2.2p")
 
         Frame.__init__(self, parent)
-        self.plot = False
         self.parent = parent
         self.initUI()
         self.createFileDict('')
@@ -95,21 +94,21 @@ class MainMenu(Frame):
         clock.place(x=5,y=65)
 
         self.rlabelvar = StringVar()
-        self.rlabelvar.set('20m')
+        self.rlabelvar.set('20mOhm')
         self.rlabel = Label(self, textvariable=self.rlabelvar)
         self.rlabel.place(x=250,y=5)
         self.rscale = Scale(self, from_=0.02, to_=2, length=190, command=self.update_rlabel) #0.2
         self.rscale.place(x=50,y=5)
 
         self.llabelvar = StringVar()
-        self.llabelvar.set('100p')
+        self.llabelvar.set('100pH')
         self.llabel = Label(self, textvariable=self.llabelvar)
         self.llabel.place(x=250,y=35)
         self.lscale = Scale(self, from_=0.079*(10**-9), to_=7.9*(10**-9), length=190, command=self.update_llabel) #0.79n
         self.lscale.place(x=50,y=35)
 
         self.clabelvar = StringVar()
-        self.clabelvar.set('200f')
+        self.clabelvar.set('200fF')
         self.clabel = Label(self, textvariable=self.clabelvar)
         self.clabel.place(x=250,y=65)
         self.cscale = Scale(self, from_=0.22*(10**-12), to_=22*(10**-12), length=190, command=self.update_clabel) #2.2p
@@ -117,7 +116,7 @@ class MainMenu(Frame):
 
         self.vilockvar = BooleanVar()
         vilock = Checkbutton(self, text="Vin", variable=self.vilockvar)
-        vilock.place(x=300,y=5)
+        vilock.place(x=310,y=5)
 
         self.dilockvar = BooleanVar()
         dilock = Checkbutton(self, text="First Drop", variable=self.dilockvar)
@@ -133,17 +132,17 @@ class MainMenu(Frame):
 
         self.volockvar = BooleanVar()
         volock = Checkbutton(self, text="Vout", variable=self.volockvar)
-        volock.place(x=300,y=35)
+        volock.place(x=310,y=35)
 
         self.cdscalevar = IntVar()
         self.cdlabelvar = StringVar()
-        self.cdlabelvar.set(0)
+        self.cdlabelvar.set('0pF')
         self.cdlabelstatic = Label(self, text = 'Cdrp')
-        self.cdlabelstatic.place(x=250, y=98)
+        self.cdlabelstatic.place(x=265, y=98)
         self.cdlabel = Label(self,textvariable=self.cdlabelvar)
         self.cdscale = Scale(self, from_=0, to_=5, variable = self.cdscalevar,command=self.update_cd)
-        self.cdscale.place(x=300, y=98)
-        self.cdlabel.place(x=425,y=98)
+        self.cdscale.place(x=310, y=98)
+        self.cdlabel.place(x=420,y=98)
 
         self.errormsgvar = StringVar()
         self.errormsg = Label(self, textvariable=self.errormsgvar, foreground='red')
@@ -151,23 +150,23 @@ class MainMenu(Frame):
 
         self.var = StringVar(self)
         self.var.set('Transient')
-        self.libary = OptionMenu(self, self.var,'', 'Transient', 'Bode')
+        self.libary = OptionMenu(self, self.var,'', 'Transient', 'Bode', 'Inverse', 'Skin Depth', 'Skin Depth Bode', 'Skin Depth Inv.')
         self.libary.place(x=145,y=95)
     # updates r slider label
     def update_rlabel(self, val):
         #self.rlabelvar.set(round(float(val),1))
-        self.rlabelvar.set(self.floatToSci(val))
+        self.rlabelvar.set(str(self.floatToSci(val)+'Ohm'))
     # updates l slider label
     def update_llabel(self, val):
         #self.llabelvar.set(round(float(val),10))
-        self.llabelvar.set(self.floatToSci(val))
+        self.llabelvar.set(str(self.floatToSci(val)+'H'))
     # updates c slider label
     def update_clabel(self, val):
         #self.clabelvar.set(round(float(val),13))
-        self.clabelvar.set(self.floatToSci(val))
+        self.clabelvar.set(str(self.floatToSci(val)+'F'))
     # updates Cdrp slider label
     def update_cd(self,val):
-        self.cdlabelvar.set(int(round(float(val))))
+        self.cdlabelvar.set(str(int(round(float(val))))+'pF')
         self.cdscalevar.set(int(round(float(val))))
     # ==========================================================================
 
@@ -242,34 +241,96 @@ class MainMenu(Frame):
             self.errormsgvar.set('the bus libraries are coming soon...')
             return None
         out.append(signal)
-        atype = ''
+        atype = []
+        to_process = False
         if self.var.get() == 'Bode':
-            atype = 'ac'
+            atype.append('ac')
             x_axis_title = 'Frequency(Hz)'
             y_axis_title = 'Gain(dB)'
         if self.var.get() == 'Transient':
-            atype = 'trans'
+            atype.append('trans')
             x_axis_title = 'Time(s)'
             y_axis_title = 'Voltage(V)'
+        if (self.var.get() == 'Inverse') or (self.var.get() == 'Skin Depth') or (self.var.get() == 'Skin Depth Inv.'):
+            to_process = True
+            atype.append('ac')
+            atype.append('trans')
+            x_axis_title = 'Time(s)'
+            y_axis_title = 'Voltage(V)'
+        if (self.var.get() == 'Skin Depth Bode'):
+            to_process = True
+            atype.append('ac')
+            atype.append('trans')
+            x_axis_title = 'Frequency(Hz)'
+            y_axis_title = 'Gain(dB)'
         out.append(atype)
-        self.plot = False
         todo = []
         for r in out[0]:
             for l in out[1]:
                 for c in out[2]:
-                    todo.append(((r,l,c),out[3],signal,out[5]))
+                    for a in out[5]:
+                        todo.append(((r,l,c),out[3],signal,a))
         instructions = []
-        color_step = 1.0/len(todo)
-        color = 0
-        for item in todo:
-            instruction = [0,0,0]
-            instruction[0] = self.folder_dict[item]
-            instruction[1] = item[2]
-            instruction[2] = (color,0,1-color)
-            instructions.append(instruction)
-            color+=color_step
-        title = self.var.get().upper() + ' ' + signal.upper() + '\n'+ 'Cdrp=' + str(self.cdscale.get())  + 'p  ' + self.get_name_tag()
-        self.new_figure(title, instructions, x_axis_title, y_axis_title)
+        title = self.var.get().upper() + ' ' + signal.upper() + '\n'+ 'Cdrp=' + str(self.cdscale.get())  + '  ' + self.get_name_tag()
+        if to_process == False:
+            color_step = 1.0/len(todo)
+            color = 0
+            for item in todo:
+                instruction = [0,0,0]
+                instruction[0] = self.folder_dict[item]
+                instruction[1] = item[2]
+                instruction[2] = (color,0,1-color)
+                instructions.append(instruction)
+                color+=color_step
+            self.new_figure(title, instructions, x_axis_title, y_axis_title)
+        else:
+            res = 4096
+            selected_ac = []
+            selected_trans = []
+            low_pass_filter = bode.low_pass_filter(8e8,1e9)
+            for item in todo:
+                if item[3] == 'ac':
+                    selected_ac.append(self.folder_dict[item])
+                if item[3] == 'trans':
+                    selected_trans.append(self.folder_dict[item])
+            if (self.var.get() == 'Inverse'):
+                self.errormsgvar.set('this may take a moment...')
+                t_list = []
+                v_list = []
+                amp_list = []
+                freq_list = []
+                inv_list = []
+                x_list = []
+                y_list = []
+                for trans in selected_trans:
+                    t,v,amp,freq = bode.trans_fourier(trans, False, res)
+                    t_list.append(t)
+                    v_list.append(v)
+                    amp_list.append(amp)
+                    freq_list.append(freq)
+                for ac in selected_ac:
+                    inv_list.append(bode.invert_transfer_function(ac, res))
+                color_step = 1.0/len(t_list)
+                color = 0
+                color_list = []
+                for i in range(0, len(t_list)):
+                    t,v,amp,freq = t_list[i],v_list[i],amp_list[i],freq_list[i]
+                    color_list.append((color,0,1-color))
+                    color += color_step
+                    new_amp = bode.apply_transfer_func(freq, amp, inv_list[i])
+                    new_amp = bode.apply_transfer_func(freq, new_amp, inv_list[i])
+                    # new_amp = bode.apply_transfer_func(freq, new_amp, low_pass_filter)
+                    new_v = bode.inv_fourier(freq,new_amp)
+                    x_list.append(bode.genrange(1e-7,len(new_v)))
+                    y_list.append(new_v)
+                self.errormsgvar.set('')
+                self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title,color_list)
+            if (self.var.get() == 'Skin Depth'):
+                self.errormsgvar.set('skin depth plotting functionality coming soon')
+            if (self.var.get() == 'Skin Depth Bode'):
+                self.errormsgvar.set('skin depth bode plotting functionality coming soon')
+            if (self.var.get() == 'Skin Depth Inv.'):
+                self.errormsgvar.set('skin depth inverse plotting functionality coming soon')
     # returns r,l,c description for title
     def get_name_tag(self):
         '''
@@ -278,15 +339,15 @@ class MainMenu(Frame):
         const = []
         var = []
         if self.rlockvar.get():
-            const.append('R=' + self.rlabelvar.get() + 'Ohm ')
+            const.append('R=' + self.rlabelvar.get() + ' ')
         else:
             var.append('R ')
         if self.llockvar.get():
-            const.append('L=' + self.llabelvar.get() + 'H ')
+            const.append('L=' + self.llabelvar.get() + ' ')
         else:
             var.append('L ')
         if self.clockvar.get():
-            const.append('C=' + self.clabelvar.get() + 'F ')
+            const.append('C=' + self.clabelvar.get() + ' ')
         else:
             var.append('C ')
         tag = ''
@@ -411,6 +472,14 @@ class MainMenu(Frame):
     # Plotting Functionality
     # --------------------------------------------------------------------------
     # generates new figure and shows it
+    def new_figure_no_file(self, title, x_axis_list, y_axis_list, x_axis_title, y_axis_title, color_list):
+        '''
+        '''
+        fig = self.create_new_figure(title)
+        for i in range(0, len(x_axis_list)):
+            self.plot_axes(fig, x_axis_list[i], y_axis_list[i], color_list[i], x_axis_title, y_axis_title)
+        plt.show()
+    #
     def new_figure(self, title, plot_info, x_axis_title, y_axis_title):
         '''
         title:      plot
@@ -442,7 +511,15 @@ class MainMenu(Frame):
         ax.set_xlabel(x_axis_title)
         ax.set_ylabel(y_axis_title)
         data = np.genfromtxt(file_path, delimiter=',', names=['t', name])
-        ax.plot(data['t'], data[name], color=plot_color, linestyle='-') #, label=name
+        ax.plot(data['t'], data[name], color=plot_color, linestyle='-')
+    #
+    def plot_axes(self, fig, x_axis_list, y_axis_list, plot_color, x_axis_title, y_axis_title):
+        '''
+        '''
+        ax = fig.add_subplot(111)
+        ax.set_xlabel(x_axis_title)
+        ax.set_ylabel(y_axis_title)
+        ax.plot(x_axis_list, y_axis_list, color=plot_color, linestyle='-')
     # instantiates a new figure for new plots
     def create_new_figure(self, title):
         '''
