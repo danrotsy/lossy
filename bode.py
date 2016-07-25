@@ -87,6 +87,14 @@ def invert_transfer_function(file_path,res):
             line = str(line_split[0]) + ',' + str(line_split[1]) + ',' + str(line_split[2]) + r'\n'
 
     return transfer_func_inv
+#
+def invert_known_transfer_function(transfer_function):
+    '''
+    '''
+    for i in range(0, len(transfer_function[0])):
+        transfer_function[1][i] = 1.0/(transfer_function[1][i])
+        transfer_function[2][i] = -transfer_function[2][i]
+    return transfer_function
 # returns the transfer funciton of a file at a give resolution
 def transfer_function(file_path,res):
     '''
@@ -113,6 +121,21 @@ def transfer_function(file_path,res):
             # new line if method for saving transfer functions is added
             line = str(line_split[0]) + ',' + str(line_split[1]) + ',' + str(line_split[2]) + r'\n'
 
+    return transfer_function
+#
+def to_dB(transfer_function):
+    '''
+    '''
+    print 'to_dB', len(transfer_function[0])
+    for i in range(0, len(transfer_function[0])):
+        transfer_function[1][i] = 20.0*math.log10(transfer_function[1][i])
+    return transfer_function
+#
+def to_H(transfer_function):
+    '''
+    '''
+    for i in range(0, len(transfer_function[0])):
+        transfer_function[1][i] = math.pow(10,(transfer_function[1][i]/20.0))
     return transfer_function
 # ==============================================================================
 

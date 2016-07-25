@@ -45,14 +45,11 @@ def transpose(transfer_functions, rvals, freq_domain):
     overlays transfer functions of different r's to simulate skin effect
     '''
     skin_func = [freq_domain[1:],[],[]]
-    for key in transfer_functions:
-        print key
     for i in range(1,len(freq_domain)):
         f= freq_domain[i]
         r = get_r(f)
         r = num.find_closest(rvals, r)
         func = transfer_functions[round(r,2)]
-        print f, get_r(f), r, bode.get_val(func[0],func[1],f)
         skin_func[1].append(bode.get_val(func[0],func[1], f))
         skin_func[2].append(bode.get_val(func[0],func[2], f))
     return skin_func
@@ -117,8 +114,8 @@ def get_main_save():
 # ------------------------------------------------------------------------------
 # Testing
 # ------------------------------------------------------------------------------
-folder_dict, rvals, lvals, cvals = get_main_save()
-skin_transfer_func = get_skin_transfer_func(folder_dict, rvals, lvals[0], cvals[0], 1, 2048, range(0,1000000000,10000000))
-plt.plot(skin_transfer_func[0],skin_transfer_func[1])
-plt.show()
+# folder_dict, rvals, lvals, cvals = get_main_save()
+# skin_transfer_func = get_skin_transfer_func(folder_dict, rvals, lvals[0], cvals[0], 1, 2048, range(0,1000000000,10000000))
+# plt.plot(skin_transfer_func[0],skin_transfer_func[1])
+# plt.show()
 # ==============================================================================

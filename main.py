@@ -367,18 +367,48 @@ class MainMenu(Frame):
                 color += color_step
                 new_amp = bode.apply_transfer_func(freq, amp, inv_list[i])
                 new_amp = bode.apply_transfer_func(freq, new_amp, inv_list[i])
-                # new_amp = bode.apply_transfer_func(freq, new_amp, low_pass_filter)
+                new_amp = bode.apply_transfer_func(freq, new_amp, low_pass_filter)
                 new_v = bode.inv_fourier(freq,new_amp)
                 x_list.append(bode.genrange(1e-7,len(new_v)))
                 y_list.append(new_v)
             self.errormsgvar.set('')
-            self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title,color_list)
+            self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title, color_list)
         if (self.var.get() == 'Skin Depth'):
-            self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title,color_list)
+            for i in range(0, len(t_list)):
+                t,v,amp,freq = t_list[i],v_list[i],amp_list[i],freq_list[i]
+                color_list.append((color,0,1-color))
+                color += color_step
+                skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], res, bode.genrange(1.0e9,100))
+                new_amp = bode.apply_transfer_func(freq, amp, inv_list[i])
+                new_amp = bode.apply_transfer_func(freq, amp, skin_depth_transfer_func)
+                new_v = bode.inv_fourier(freq, new_amp)
+                x_list.append(bode.genrange(1e-7,len(new_v)))
+                y_list.append(new_v)
+            self.errormsgvar.set('')
+            self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title, color_list)
         if (self.var.get() == 'Skin Depth Bode'):
-            self.errormsgvar.set('skin depth bode plotting functionality coming soon')
+            color_list.append((color,0,1-color))
+            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], res, bode.genrange(1.0e9,100))
+            skin_depth_transfer_func = bode.to_dB(skin_depth_transfer_func)
+            x_list.append(skin_depth_transfer_func[0])
+            y_list.append(skin_depth_transfer_func[1])
+            self.errormsgvar.set('')
+            self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title, color_list)
         if (self.var.get() == 'Skin Depth Inv.'):
-            self.errormsgvar.set('skin depth inverse plotting functionality coming soon')
+            for i in range(0, len(t_list)):
+                t,v,amp,freq = t_list[i],v_list[i],amp_list[i],freq_list[i]
+                color_list.append((color,0,1-color))
+                color += color_step
+                skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], 2048, bode.genrange(1.0e9,100))
+                skin_depth_transfer_func_inv = bode.invert_known_transfer_function(skin_depth_transfer_func)
+                new_amp = bode.apply_transfer_func(freq, amp, inv_list[i])
+                new_amp = bode.apply_transfer_func(freq, amp, skin_depth_transfer_func_inv)
+                new_amp = bode.apply_transfer_func(freq, new_amp, low_pass_filter)
+                new_v = bode.inv_fourier(freq, new_amp)
+                x_list.append(bode.genrange(1e-7,len(new_v)))
+                y_list.append(new_v)
+            self.errormsgvar.set('')
+            self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title, color_list)
     # returns r,l,c description for title
     def get_name_tag(self):
         '''
