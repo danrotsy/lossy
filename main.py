@@ -32,6 +32,11 @@ try:
 except:
     print 'cannot find "skin.py" in application directory'
 
+try:
+    import cPickle as pickle
+except:
+    print 'the "cPickle" library is required for this application'
+
 from numpy import arange
 # ==============================================================================
 
@@ -519,6 +524,12 @@ class MainMenu(Frame):
                                 self.folder_dict[perm_dict_key] =r"{var_actrans}\Cdrp_{var_cdrp}_{var_signal}\StepInformationRline={var_r}Lline={var_l}Cline={var_c}.csv".format(var_actrans=lib, var_cdrp=cdrp, var_signal=signal, var_r=self.floatToSci(r), var_l=self.floatToSci(l), var_c=self.floatToSci(c))
 
         return self.folder_dict
+    #
+    def save(self):
+        '''
+        '''
+        with open(r"main_save.p", 'wb') as file:
+            pickle.dump([self.folder_dict,self.Rvals,self.Lvals,self.Cvals],file)
     # ==========================================================================
 
 
@@ -595,4 +606,5 @@ if __name__ == '__main__':
     root = Tk()
     root.geometry("445x150+300+300")
     mainmenu = MainMenu(root)
+    mainmenu.save()
     root.mainloop()
