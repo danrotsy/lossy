@@ -188,6 +188,7 @@ class MainMenu(Frame):
     # finds and plots all files given info on the gui
     def gui_to_plots(self):
         '''
+        finds and plots all files given info on the gui
         '''
         #
         self.errormsgvar.set('')
@@ -207,6 +208,7 @@ class MainMenu(Frame):
     # returns the output of the gui in a comprehensible format (out,process)
     def gui_out(self):
         '''
+        returns the output of the gui in a comprehensible format (out,process)
         '''
         out = []
         x_axis_title = ''
@@ -294,9 +296,10 @@ class MainMenu(Frame):
             y_axis_title = 'Gain(dB)'
         out.append(atype)
         return out,to_process,signal,x_axis_title,y_axis_title
-    #
+    # creates a list of r,l and c's to inspect and plot
     def get_todo(self, out, signal):
         '''
+        creates a list of r,l and c's to inspect and plot
         '''
         todo = []
         for r in out[0]:
@@ -305,9 +308,10 @@ class MainMenu(Frame):
                     for a in out[5]:
                         todo.append(((r,l,c),out[3],signal,a))
         return todo
-    #
+    # plots simple transient or bode plots
     def plot_simple(self, todo, title, x_axis_title, y_axis_title):
         '''
+        plots simple transient or bode plots
         '''
         instructions = []
         color_step = 1.0/len(todo)
@@ -320,9 +324,10 @@ class MainMenu(Frame):
             instructions.append(instruction)
             color+=color_step
         self.new_figure(title, instructions, x_axis_title, y_axis_title)
-    #
+    # plots transient or bode plots after transforms are applied
     def plot_complex(self, todo, title, x_axis_title, y_axis_title):
         '''
+        plots transient or bode plots after transforms are applied
         '''
         res = 4096
         selected_ac = []
@@ -369,23 +374,6 @@ class MainMenu(Frame):
             self.errormsgvar.set('')
             self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title,color_list)
         if (self.var.get() == 'Skin Depth'):
-            for i in range(0, len(t_list)):
-                t,v,amp,freq = t_list[i],v_list[i],amp_list[i],freq_list[i]
-                color_list.append((color,0,1-color))
-                color += color_step
-                if (self.rlockvar.get() == False) and (self.llockvar.get() == True) and (self.clockvar.get() == True):
-                    l = self.findClosest(self.Lvals, self.lscale.get())
-                    c = self.findClosest(self.Cvals, self.cscale.get())
-                    Cdrpin = self.cdscale.get()
-                else:
-                    self.errormsgvar.set('skin depth must have only l and c chekced')
-                    break
-                skin_func = skin.get_skin_transfer_function(self.folder_dict,self.rvals,l,c,Cdrpin,res,freq)
-                new_amp = bode.apply_transfer_func(freq, amp, inv_list[i])
-                new_amp = bode.apply_transfer_func(freq, amp, skin_func)
-                new_v = bode.inv_fourier(freq, new_amp)
-                x_list.append(bode.genrange(1e-7,len(new_v)))
-                y_list.append(new_v)
             self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title,color_list)
         if (self.var.get() == 'Skin Depth Bode'):
             self.errormsgvar.set('skin depth bode plotting functionality coming soon')
@@ -524,9 +512,10 @@ class MainMenu(Frame):
                                 self.folder_dict[perm_dict_key] =r"{var_actrans}\Cdrp_{var_cdrp}_{var_signal}\StepInformationRline={var_r}Lline={var_l}Cline={var_c}.csv".format(var_actrans=lib, var_cdrp=cdrp, var_signal=signal, var_r=self.floatToSci(r), var_l=self.floatToSci(l), var_c=self.floatToSci(c))
 
         return self.folder_dict
-    #
+    # saves folder_dict, Rvals, Lvals, and Cvals in a pickle file
     def save(self):
         '''
+        saves folder_dict, Rvals, Lvals, and Cvals in a pickle file
         '''
         with open(r"main_save.p", 'wb') as file:
             pickle.dump([self.folder_dict,self.Rvals,self.Lvals,self.Cvals],file)
