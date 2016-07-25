@@ -18,7 +18,7 @@ def find_closest(list_vals,val):
     '''
     finds the closest element given a list and a value
     '''
-    left, right, fill1, fill2 = find_closest_two()
+    left, right, fill1, fill2 = find_closest_two(list_vals, val)
     left = abs(val-left)
     right = abs(val-left)
     if left <= right:
