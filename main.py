@@ -83,7 +83,7 @@ class MainMenu(Frame):
         self.parent.title("Transmission Lines")
         self.pack(fill=BOTH, expand=1)
 
-        plotButton = Button(self, text="Plot", command=self.gui_to_vals, width= 20)
+        plotButton = Button(self, text="Plot", command=self.gui_to_plots, width= 20)
         plotButton.place(x=5, y=95)
 
         self.rlockvar = BooleanVar()
@@ -101,22 +101,22 @@ class MainMenu(Frame):
         self.rlabelvar = StringVar()
         self.rlabelvar.set('20mOhm/m')
         self.rlabel = Label(self, textvariable=self.rlabelvar)
-        self.rlabel.place(x=250,y=5)
-        self.rscale = Scale(self, from_=0.02, to_=2, length=190, command=self.update_rlabel) #0.2
+        self.rlabel.place(x=235,y=5)
+        self.rscale = Scale(self, from_=0.02, to_=2, length=185, command=self.update_rlabel) #0.2
         self.rscale.place(x=50,y=5)
 
         self.llabelvar = StringVar()
         self.llabelvar.set('100pH/m')
         self.llabel = Label(self, textvariable=self.llabelvar)
-        self.llabel.place(x=250,y=35)
-        self.lscale = Scale(self, from_=0.079*(10**-9), to_=7.9*(10**-9), length=190, command=self.update_llabel) #0.79n
+        self.llabel.place(x=235,y=35)
+        self.lscale = Scale(self, from_=0.079*(10**-9), to_=7.9*(10**-9), length=185, command=self.update_llabel) #0.79n
         self.lscale.place(x=50,y=35)
 
         self.clabelvar = StringVar()
         self.clabelvar.set('200fF/m')
         self.clabel = Label(self, textvariable=self.clabelvar)
-        self.clabel.place(x=250,y=65)
-        self.cscale = Scale(self, from_=0.22*(10**-12), to_=22*(10**-12), length=190, command=self.update_clabel) #2.2p
+        self.clabel.place(x=235,y=65)
+        self.cscale = Scale(self, from_=0.22*(10**-12), to_=22*(10**-12), length=185, command=self.update_clabel) #2.2p
         self.cscale.place(x=50,y=65)
 
         self.vilockvar = BooleanVar()
@@ -181,10 +181,29 @@ class MainMenu(Frame):
     # File-GUI interaction
     # --------------------------------------------------------------------------
     # finds and plots all files given info on the gui
-    def gui_to_vals(self):
+    def gui_to_plots(self):
+        '''
+        '''
+        #
         self.errormsgvar.set('')
+        #
+        out,to_process,signal,x_axis_title,y_axis_title = self.gui_out()
+        #
+        title = self.var.get().upper() + ' ' + signal.upper() + '\n'+ 'Cdrp=' + str(self.cdlabelvar.get())  + '  ' + self.get_name_tag()
+        #
+        todo = self.get_todo(out,signal)
+        #
+        if to_process == False:
+            #
+            self.plot_simple(todo, title, x_axis_title, y_axis_title)
+        else:
+            #
+            self.plot_complex(todo, title, x_axis_title, y_axis_title)
+    # returns the output of the gui in a comprehensible format (out,process)
+    def gui_out(self):
+        '''
+        '''
         out = []
-        title = ''
         x_axis_title = ''
         y_axis_title = ''
         if self.rlockvar.get():
@@ -269,93 +288,104 @@ class MainMenu(Frame):
             x_axis_title = 'Frequency(Hz)'
             y_axis_title = 'Gain(dB)'
         out.append(atype)
+        return out,to_process,signal,x_axis_title,y_axis_title
+    #
+    def get_todo(self, out, signal):
+        '''
+        '''
         todo = []
         for r in out[0]:
             for l in out[1]:
                 for c in out[2]:
                     for a in out[5]:
                         todo.append(((r,l,c),out[3],signal,a))
+        return todo
+    #
+    def plot_simple(self, todo, title, x_axis_title, y_axis_title):
+        '''
+        '''
         instructions = []
-        title = self.var.get().upper() + ' ' + signal.upper() + '\n'+ 'Cdrp=' + str(self.cdlabelvar.get())  + '  ' + self.get_name_tag()
-        if to_process == False:
-            color_step = 1.0/len(todo)
-            color = 0
-            for item in todo:
-                instruction = [0,0,0]
-                instruction[0] = self.folder_dict[item]
-                instruction[1] = item[2]
-                instruction[2] = (color,0,1-color)
-                instructions.append(instruction)
-                color+=color_step
-            self.new_figure(title, instructions, x_axis_title, y_axis_title)
-        else:
-            res = 4096
-            selected_ac = []
-            selected_trans = []
-            low_pass_filter = bode.low_pass_filter(8e8,1e9)
-            t_list = []
-            v_list = []
-            amp_list = []
-            freq_list = []
-            inv_list = []
-            std_list = []
-            x_list = []
-            y_list = []
-            for trans in selected_trans:
-                t,v,amp,freq = bode.trans_fourier(trans, False, res)
-                t_list.append(t)
-                v_list.append(v)
-                amp_list.append(amp)
-                freq_list.append(freq)
-            for ac in selected_ac:
-                inv_list.append(bode.invert_transfer_function(ac, res))
-                std_list.append(bode.transfer_funciton(ac,res))
-            print selected_trans
-            color_step = 1.0/len(t_list)
-            color = 0
-            color_list = []
-            for item in todo:
-                if item[3] == 'ac':
-                    selected_ac.append(self.folder_dict[item])
-                if item[3] == 'trans':
-                    selected_trans.append(self.folder_dict[item])
-            if (self.var.get() == 'Inverse'):
-                self.errormsgvar.set('this may take a moment...')
-                for i in range(0, len(t_list)):
-                    t,v,amp,freq = t_list[i],v_list[i],amp_list[i],freq_list[i]
-                    color_list.append((color,0,1-color))
-                    color += color_step
-                    new_amp = bode.apply_transfer_func(freq, amp, inv_list[i])
-                    new_amp = bode.apply_transfer_func(freq, new_amp, inv_list[i])
-                    # new_amp = bode.apply_transfer_func(freq, new_amp, low_pass_filter)
-                    new_v = bode.inv_fourier(freq,new_amp)
-                    x_list.append(bode.genrange(1e-7,len(new_v)))
-                    y_list.append(new_v)
-                self.errormsgvar.set('')
-                self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title,color_list)
-            if (self.var.get() == 'Skin Depth'):
-                for i in range(0, len(t_list)):
-                    t,v,amp,freq = t_list[i],v_list[i],amp_list[i],freq_list[i]
-                    color_list.append((color,0,1-color))
-                    color += color_step
-                    if (self.rlockvar.get() == False) and (self.llockvar.get() == True) and (self.clockvar.get() == True):
-                        l = self.findClosest(self.Lvals, self.lscale.get())
-                        c = self.findClosest(self.Cvals, self.cscale.get())
-                        Cdrpin = self.cdscale.get()
-                    else:
-                        self.errormsgvar.set('skin depth must have only l and c chekced')
-                        break
-                    skin_func = skin.get_skin_transfer_function(self.folder_dict,self.rvals,l,c,Cdrpin,res,freq)
-                    new_amp = bode.apply_transfer_func(freq, amp, inv_list[i])
-                    new_amp = bode.apply_transfer_func(freq, amp, skin_func)
-                    new_v = bode.inv_fourier(freq, new_amp)
-                    x_list.append(bode.genrange(1e-7,len(new_v)))
-                    y_list.append(new_v)
-                self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title,color_list)
-            if (self.var.get() == 'Skin Depth Bode'):
-                self.errormsgvar.set('skin depth bode plotting functionality coming soon')
-            if (self.var.get() == 'Skin Depth Inv.'):
-                self.errormsgvar.set('skin depth inverse plotting functionality coming soon')
+        color_step = 1.0/len(todo)
+        color = 0
+        for item in todo:
+            instruction = [0,0,0]
+            instruction[0] = self.folder_dict[item]
+            instruction[1] = item[2]
+            instruction[2] = (color,0,1-color)
+            instructions.append(instruction)
+            color+=color_step
+        self.new_figure(title, instructions, x_axis_title, y_axis_title)
+    #
+    def plot_complex(self, todo, title, x_axis_title, y_axis_title):
+        '''
+        '''
+        res = 4096
+        selected_ac = []
+        selected_trans = []
+        low_pass_filter = bode.low_pass_filter(8e8,1e9)
+        t_list = []
+        v_list = []
+        amp_list = []
+        freq_list = []
+        inv_list = []
+        std_list = []
+        x_list = []
+        y_list = []
+        for item in todo:
+            if item[3] == 'ac':
+                selected_ac.append(self.folder_dict[item])
+            if item[3] == 'trans':
+                selected_trans.append(self.folder_dict[item])
+        for trans in selected_trans:
+            t,v,amp,freq = bode.trans_fourier(trans, False, res)
+            t_list.append(t)
+            v_list.append(v)
+            amp_list.append(amp)
+            freq_list.append(freq)
+        for ac in selected_ac:
+            inv_list.append(bode.invert_transfer_function(ac, res))
+            std_list.append(bode.transfer_function(ac,res))
+        color_step = 1.0/len(t_list)
+        color = 0
+        color_list = []
+        #
+        if (self.var.get() == 'Inverse'):
+            self.errormsgvar.set('this may take a moment...')
+            for i in range(0, len(t_list)):
+                t,v,amp,freq = t_list[i],v_list[i],amp_list[i],freq_list[i]
+                color_list.append((color,0,1-color))
+                color += color_step
+                new_amp = bode.apply_transfer_func(freq, amp, inv_list[i])
+                new_amp = bode.apply_transfer_func(freq, new_amp, inv_list[i])
+                # new_amp = bode.apply_transfer_func(freq, new_amp, low_pass_filter)
+                new_v = bode.inv_fourier(freq,new_amp)
+                x_list.append(bode.genrange(1e-7,len(new_v)))
+                y_list.append(new_v)
+            self.errormsgvar.set('')
+            self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title,color_list)
+        if (self.var.get() == 'Skin Depth'):
+            for i in range(0, len(t_list)):
+                t,v,amp,freq = t_list[i],v_list[i],amp_list[i],freq_list[i]
+                color_list.append((color,0,1-color))
+                color += color_step
+                if (self.rlockvar.get() == False) and (self.llockvar.get() == True) and (self.clockvar.get() == True):
+                    l = self.findClosest(self.Lvals, self.lscale.get())
+                    c = self.findClosest(self.Cvals, self.cscale.get())
+                    Cdrpin = self.cdscale.get()
+                else:
+                    self.errormsgvar.set('skin depth must have only l and c chekced')
+                    break
+                skin_func = skin.get_skin_transfer_function(self.folder_dict,self.rvals,l,c,Cdrpin,res,freq)
+                new_amp = bode.apply_transfer_func(freq, amp, inv_list[i])
+                new_amp = bode.apply_transfer_func(freq, amp, skin_func)
+                new_v = bode.inv_fourier(freq, new_amp)
+                x_list.append(bode.genrange(1e-7,len(new_v)))
+                y_list.append(new_v)
+            self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title,color_list)
+        if (self.var.get() == 'Skin Depth Bode'):
+            self.errormsgvar.set('skin depth bode plotting functionality coming soon')
+        if (self.var.get() == 'Skin Depth Inv.'):
+            self.errormsgvar.set('skin depth inverse plotting functionality coming soon')
     # returns r,l,c description for title
     def get_name_tag(self):
         '''
