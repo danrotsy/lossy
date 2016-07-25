@@ -27,6 +27,11 @@ try:
 except:
     print 'cannot find "bode.py" in application directory'
 
+try:
+    import skin
+except:
+    print 'cannot find "skin.py" in application directory'
+
 from numpy import arange
 # ==============================================================================
 
@@ -94,21 +99,21 @@ class MainMenu(Frame):
         clock.place(x=5,y=65)
 
         self.rlabelvar = StringVar()
-        self.rlabelvar.set('20mOhm')
+        self.rlabelvar.set('20mOhm/m')
         self.rlabel = Label(self, textvariable=self.rlabelvar)
         self.rlabel.place(x=250,y=5)
         self.rscale = Scale(self, from_=0.02, to_=2, length=190, command=self.update_rlabel) #0.2
         self.rscale.place(x=50,y=5)
 
         self.llabelvar = StringVar()
-        self.llabelvar.set('100pH')
+        self.llabelvar.set('100pH/m')
         self.llabel = Label(self, textvariable=self.llabelvar)
         self.llabel.place(x=250,y=35)
         self.lscale = Scale(self, from_=0.079*(10**-9), to_=7.9*(10**-9), length=190, command=self.update_llabel) #0.79n
         self.lscale.place(x=50,y=35)
 
         self.clabelvar = StringVar()
-        self.clabelvar.set('200fF')
+        self.clabelvar.set('200fF/m')
         self.clabel = Label(self, textvariable=self.clabelvar)
         self.clabel.place(x=250,y=65)
         self.cscale = Scale(self, from_=0.22*(10**-12), to_=22*(10**-12), length=190, command=self.update_clabel) #2.2p
@@ -155,15 +160,15 @@ class MainMenu(Frame):
     # updates r slider label
     def update_rlabel(self, val):
         #self.rlabelvar.set(round(float(val),1))
-        self.rlabelvar.set(str(self.floatToSci(val)+'Ohm'))
+        self.rlabelvar.set(str(self.floatToSci(val)+'Ohm/m'))
     # updates l slider label
     def update_llabel(self, val):
         #self.llabelvar.set(round(float(val),10))
-        self.llabelvar.set(str(self.floatToSci(val)+'H'))
+        self.llabelvar.set(str(self.floatToSci(val)+'H/m'))
     # updates c slider label
     def update_clabel(self, val):
         #self.clabelvar.set(round(float(val),13))
-        self.clabelvar.set(str(self.floatToSci(val)+'F'))
+        self.clabelvar.set(str(self.floatToSci(val)+'F/m'))
     # updates Cdrp slider label
     def update_cd(self,val):
         self.cdlabelvar.set(str(int(round(float(val))))+'pF')
@@ -288,6 +293,27 @@ class MainMenu(Frame):
             selected_ac = []
             selected_trans = []
             low_pass_filter = bode.low_pass_filter(8e8,1e9)
+            t_list = []
+            v_list = []
+            amp_list = []
+            freq_list = []
+            inv_list = []
+            std_list = []
+            x_list = []
+            y_list = []
+            for trans in selected_trans:
+                t,v,amp,freq = bode.trans_fourier(trans, False, res)
+                t_list.append(t)
+                v_list.append(v)
+                amp_list.append(amp)
+                freq_list.append(freq)
+            for ac in selected_ac:
+                inv_list.append(bode.invert_transfer_function(ac, res))
+                std_list.append(bode.transfer_funciton(ac,res))
+            print selected_trans
+            color_step = 1.0/len(t_list)
+            color = 0
+            color_list = []
             for item in todo:
                 if item[3] == 'ac':
                     selected_ac.append(self.folder_dict[item])
@@ -295,24 +321,6 @@ class MainMenu(Frame):
                     selected_trans.append(self.folder_dict[item])
             if (self.var.get() == 'Inverse'):
                 self.errormsgvar.set('this may take a moment...')
-                t_list = []
-                v_list = []
-                amp_list = []
-                freq_list = []
-                inv_list = []
-                x_list = []
-                y_list = []
-                for trans in selected_trans:
-                    t,v,amp,freq = bode.trans_fourier(trans, False, res)
-                    t_list.append(t)
-                    v_list.append(v)
-                    amp_list.append(amp)
-                    freq_list.append(freq)
-                for ac in selected_ac:
-                    inv_list.append(bode.invert_transfer_function(ac, res))
-                color_step = 1.0/len(t_list)
-                color = 0
-                color_list = []
                 for i in range(0, len(t_list)):
                     t,v,amp,freq = t_list[i],v_list[i],amp_list[i],freq_list[i]
                     color_list.append((color,0,1-color))
@@ -326,7 +334,24 @@ class MainMenu(Frame):
                 self.errormsgvar.set('')
                 self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title,color_list)
             if (self.var.get() == 'Skin Depth'):
-                self.errormsgvar.set('skin depth plotting functionality coming soon')
+                for i in range(0, len(t_list)):
+                    t,v,amp,freq = t_list[i],v_list[i],amp_list[i],freq_list[i]
+                    color_list.append((color,0,1-color))
+                    color += color_step
+                    if (self.rlockvar.get() == False) and (self.llockvar.get() == True) and (self.clockvar.get() == True):
+                        l = self.findClosest(self.Lvals, self.lscale.get())
+                        c = self.findClosest(self.Cvals, self.cscale.get())
+                        Cdrpin = self.cdscale.get()
+                    else:
+                        self.errormsgvar.set('skin depth must have only l and c chekced')
+                        break
+                    skin_func = skin.get_skin_transfer_function(self.folder_dict,self.rvals,l,c,Cdrpin,res,freq)
+                    new_amp = bode.apply_transfer_func(freq, amp, inv_list[i])
+                    new_amp = bode.apply_transfer_func(freq, amp, skin_func)
+                    new_v = bode.inv_fourier(freq, new_amp)
+                    x_list.append(bode.genrange(1e-7,len(new_v)))
+                    y_list.append(new_v)
+                self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title,color_list)
             if (self.var.get() == 'Skin Depth Bode'):
                 self.errormsgvar.set('skin depth bode plotting functionality coming soon')
             if (self.var.get() == 'Skin Depth Inv.'):
