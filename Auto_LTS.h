@@ -36,12 +36,13 @@ struct params
 	char **ext_param_name;
 	char **ext_param_str;
 	float **ext_param_step_array;
-	float **ext_param_data_array;
+	//float **ext_param_data_array;
 	float **ext_param_permutations;
 	float *ext_param_curr;
 	int *ext_param_index;
 
 	int num_param;
+	unsigned int num_perm;
 	int curr_size;
 }; 
 
@@ -97,7 +98,7 @@ int realloc_params(struct params *run)
  */
 int free_params(struct params *run)
 {
-	for(int n=0; n < run->num_params; n++) {
+	for(int n=0; n < run->num_param; n++) {
 		free(run->ext_param_name[n]);
 		free(run->ext_param_str[n]);
 		free(run->ext_param_step_array[n]);
@@ -225,6 +226,128 @@ int update_run(struct params *run)
 	else
 		return 0;
 
+	return 0;
+}
+
+/*
+ * Goes through the input file, tl_netlist, extracting the necessary
+ * step parameters and put them into run. Also the long pointers 
+ * store the position that the .tran, .ac, .param spice directives
+ * appear in the file, so that they can be accessed later
+ */
+int prepare_run(struct params *run, FILE* tl_netlist, long *tran_pos, long *ac_pos, long *param_pos)
+{	
+	char buffer[255];
+	char str_fl[20];
+	char *p_ch;
+	char *p_tok;
+	char *p_end;
+	int param_index = 0;
+	int data_index = 0;
+	long tmp_pos;
+	float tmp_data = 0;
+	
+	while(!feof(tl_netlist)) {
+		tmp_pos = ftell(tl_netlist);
+		fgets(buffer, 255, tl_netlist);
+		p_tok = strtok(buffer, " ");
+		if(strcmp(buffer+1, "tran")==0) {
+			printf("Transient data\n");
+			buffer[5] = ' ';
+			*tran_pos = tmp_pos;
+		} else if(strcmp(buffer+1, "ac")==0) {
+			printf("AC data\n");
+			buffer[3] = ' ';
+			*ac_pos = tmp_pos;
+		} else if(strcmp(buffer, ".param")==0) {
+			printf("Parameter data\n");
+			buffer[6] = ' ';
+			*param_pos = tmp_pos;
+			p_ch = buffer;
+			/*
+			 * Create comment for do { } while loop
+			 */
+			do {
+				for(int n=0; n < run->num_param; n++) {
+					int length = strlen(run->ext_param_name[n]);
+					if(memcmp(p_ch-length, run->ext_param_name[n], length)==0)
+						run->ext_param_index[n] = p_ch - buffer;
+				}
+			} while(*(++p_ch));
+		} else if(strcmp(buffer+1, "step")==0) {
+			strtok(NULL, " ");
+			p_tok = strtok(NULL, " ");
+			printf("Strcpy %s into run.ext_param_name[%d]\n", p_tok, run->num_param);
+			printf("Current size: %d\n", run->curr_size);
+			strcpy(run->ext_param_name[run->num_param], p_tok);
+			data_index = 0;
+			while(p_tok!=NULL) {
+				p_end = p_tok;
+				printf("Strcpy p_tok: %s into str_fl...\n", p_tok);
+				strcpy(str_fl, p_tok);
+				p_ch = str_fl;
+				do {
+					switch(*p_ch) {
+					case 'a': strcpy(p_ch, "E-18"); break;
+					case 'f': strcpy(p_ch, "E-15"); break;
+					case 'p': strcpy(p_ch, "E-12"); break;
+					case 'n':strcpy(p_ch, "E-9"); break;
+					case 'u':strcpy(p_ch, "E-6"); break;
+					case 'm':strcpy(p_ch, "E-3"); break;
+					case 'k': strcpy(p_ch, "E3"); break;
+					case 'M':strcpy(p_ch, "E6"); break;
+					}
+				} while(*(++p_ch));
+				tmp_data = strtof(str_fl, &p_end);
+				if (str_fl != p_end) {
+					run->ext_param_step_array[run->num_param][data_index] = tmp_data;
+					data_index++;
+				}
+				p_tok = strtok(NULL, " ");
+			}
+			run->num_param++;
+			if(run->num_param >= run->curr_size) {
+				run->curr_size = run->num_param + 3;
+				printf("Reallocate param memory...\n");
+				realloc_params(run);
+			}
+		}
+	}
+	for(int i=0; i < run->num_param; i++) {
+		printf("\n%s\n", run->ext_param_name[i]);
+		for(int j=0; j < 3; j++) 
+			printf("%e ", run->ext_param_step_array[i][j]);
+	}
+	printf("\n");
+	
+	for(int n=0; n < run->num_param; n++)
+		run->ext_param_curr[n] = run->ext_param_step_array[n][0];
+	/*
+	printf("Generating data arrays for .step params...\n");
+	for(int n=0; n < run->num_param; n++)
+		generate_data_array(run->ext_param_step_array[n][0], run->ext_param_step_array[n][1], run->ext_param_step_array[n][2], run->ext_param_data_array[n]);
+	*/
+	run->num_perm = 1;
+	printf("Generating the number of run.ext_param_permutations for .step params...\n");
+	for(int n=0; n < run->num_param; n++) {
+		run->num_perm *= (unsigned int)((run->ext_param_step_array[n][1]-run->ext_param_step_array[n][0])/run->ext_param_step_array[n][2]+1);
+	}
+	printf("Allocating memory for an array of size %u with float* to store run.ext_param_permutations...\n", run->num_perm);
+	run->ext_param_permutations = malloc(run->num_perm*sizeof(float*));
+	if(!run->ext_param_permutations)
+		printf("Not enough memory to allocate run.ext_param_permutations array\n");
+	
+	for(unsigned int i=0; i < run->num_perm; i++) {
+		run->ext_param_permutations[i] = malloc(run->num_param*sizeof(float));
+		for(int j=0; j < run->num_param; j++) {
+			run->ext_param_permutations[i][j] = run->ext_param_curr[j];
+		}
+		update_run(run);
+	}
+	for(int n=0; n < run->num_param; n++)
+		run->ext_param_curr[n] = run->ext_param_step_array[n][0];
+	
+	printf("Number of run.ext_param_permutations: %d\n", run->num_perm);
 	return 0;
 }
 #endif /* AUTO_LTS_H */

@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
 	 * sub in the new values each simualation run,
 	 * so the .param line MUST come after the .step
 	 * param directives in the input file
-	 */
+	 *
 	while(!feof(tl_netlist)) {
 		tmp_pos = ftell(tl_netlist);
 		fgets(buffer, 255, tl_netlist);
@@ -90,7 +90,8 @@ int main(int argc, char* argv[])
 			param_pos = tmp_pos;
 			p_ch = buffer;
 			/*
-			 * This loop 
+			 * Create comment for do { } while loop
+			 *
 			do {
 				for(int n=0; n < run.num_param; n++) {
 					int length = strlen(run.ext_param_name[n]);
@@ -172,6 +173,9 @@ int main(int argc, char* argv[])
 		run.ext_param_curr[n] = run.ext_param_step_array[n][0];
 	
 	printf("Number of run.ext_param_permutations: %d\n", num_perm);
+	*/
+	
+	prepare_run(&run, tl_netlist, &tran_pos, &ac_pos, &param_pos);
 	
 	/*
 	 * step one: run all ltspice netlists with varying parameters in length, cdrp and ac vs tran
@@ -207,7 +211,7 @@ int main(int argc, char* argv[])
 					perror("Error in 2nd tran fseek");
 		}
 		fputc(';', tl_netlist);
-		for(unsigned int j=0; j < num_perm; j++) {
+		for(unsigned int j=0; j < run.num_perm; j++) {
 			tl_netlist = freopen(filename_in, "r+", tl_netlist);
 			printf("\n");
 			if(fseek(tl_netlist, param_pos, SEEK_SET))

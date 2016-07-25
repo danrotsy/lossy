@@ -1,4 +1,4 @@
-; C:\LTSpiceTransmissionLines\LTSpice\sim\main\tranmission_line.asc
+* C:\LTSpiceTransmissionLines\LTSpice\sim\main\tranmission_line.asc
 O2 N026 N052 Out OutRef LossyTL
 rf N052 0 100k
 C1 N026 0 {Cdrp}
@@ -86,14 +86,12 @@ R2 Out OutRef {Rterm}
 .model LossyTL  LTRA(len=Lenline R=Rline L=Lline C=Cline)
 .tran 0 100n
 ;ac oct 50 10k 1000Meg
-;step param Rline 0.02 2 .2
+;step param Rline 0.02 2 0.2
 ;step param Lline 0.079n 7.9n 0.79n
 ;step param Cline 0.22p 22p 2.2p
 ;step param Cdrp 1p 5p 1p
-;step param Lenline 1 10 1
-.param  Cdrp=1.0p  Rterm =sqrt(Lline/Cline) Lenline=1.0n   Rline=620m   Lline=79.pn Cline=220f
-.save V(Out) V(N001) V(N014) V(N026) V(InPulse)
+;step param Lenline 1.0 10.0 1.0
+.param  Cdrp 2.0p  Rterm =sqrt(Lline/Cline) Lenline=1.0 Rline=1.2m Lline=2.4n  Cline=4.6p
+.save V(Out) V(N001) V(N027) V(N014) V(N040) V(N026)  V(N052) V(InPulse
 .backanno
 .end
-.
-...
