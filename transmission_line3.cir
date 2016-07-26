@@ -91,7 +91,7 @@ R2 Out OutRef {Rterm}
 ;step param Cline 0.22p 22p 2.2p
 ;step param Cdrp 1p 5p 1p
 ;step param Lenline 1 10 1
-.param  Cdrp=1.0p  Rterm =sqrt(Lline/Cline) Lenline=1.0n   Rline=620m   Lline=79.pn Cline=220f
+.param  Cdrp=1.0p  Rterm =sqrt(Lline/Cline) Lenline=1.0n   Rline=1.2m   Lline=79.pn Cline=220f
 .save V(Out) V(N001) V(N014) V(N026) V(InPulse)
 .backanno
 .end
