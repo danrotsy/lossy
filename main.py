@@ -172,6 +172,12 @@ class MainMenu(Frame):
         self.var.set('Transient')
         self.libary = OptionMenu(self, self.var,'', 'Transient', 'Bode', 'Inverse', 'Skin Depth', 'Skin Depth Bode', 'Skin Depth Inv.')
         self.libary.place(x=145,y=95)
+
+        self.loadvar = StringVar(self)
+        self.loadvar.set('10 Loads')
+        self.loadlibary = OptionMenu(self, self.loadvar,'', '10 Loads', '14 Loads', '28 Loads')
+        self.loadlibary.place(x=145,y=125)
+
     # updates r slider label
     def update_rlabel(self, val):
         #self.rlabelvar.set(round(float(val),1))
@@ -636,7 +642,7 @@ class MainMenu(Frame):
 
 if __name__ == '__main__':
     root = Tk()
-    root.geometry("450x160+300+300")
+    root.geometry("455x160+300+300")
     mainmenu = MainMenu(root)
     mainmenu.save()
     root.mainloop()
