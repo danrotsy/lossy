@@ -156,11 +156,11 @@ class MainMenu(Frame):
 
         self.lenscalevar = IntVar()
         self.lenlabelvar = StringVar()
-        self.lenlabelvar.set('0cm')
+        self.lenlabelvar.set('1cm')
         self.lenlabelstatic = Label(self, text='Length')
         self.lenlabelstatic.place(x=265, y=128)
         self.lenlabel = Label(self,textvariable=self.lenlabelvar)
-        self.lenscale = Scale(self, from_=0, to_=20, variable = self.lenscalevar,command=self.update_len)
+        self.lenscale = Scale(self, from_=1, to_=20, variable = self.lenscalevar,command=self.update_len)
         self.lenscale.place(x=310, y=128)
         self.lenlabel.place(x=420,y=128)
 
@@ -212,9 +212,9 @@ class MainMenu(Frame):
         #
         self.errormsgvar.set('')
         #
-        out,to_process,signal,x_axis_title,y_axis_title = self.gui_out()
+        out,to_process,signal,length,drops,x_axis_title,y_axis_title = self.gui_out()
         #
-        title = self.var.get().upper() + ' ' + signal.upper() + '\n'+ 'Cdrp=' + str(self.cdlabelvar.get())  + '  ' + self.get_name_tag()
+        title = self.var.get().upper() + ' ' + signal.upper()+ '  Length: ' + str(length) + 'cm  Loads: ' + str(drops) + '\n'+ 'Cdrp=' + str(self.cdlabelvar.get())  + '  ' + self.get_name_tag()
         #
         todo = self.get_todo(out,signal)
         #
@@ -266,13 +266,13 @@ class MainMenu(Frame):
             signal = 'Vin'
             changed += 1
         if self.dilockvar.get():
-            signal = 'Vn001'
+            signal = 'Vf'
             changed += 1
         if self.dmlockvar.get():
-            signal = 'Vn014'
+            signal = 'Vm'
             changed += 1
         if self.dflockvar.get():
-            signal = 'Vn026'
+            signal = 'Vd'
             changed += 1
         if self.volockvar.get():
             signal = 'Vout'
@@ -323,7 +323,17 @@ class MainMenu(Frame):
             x_axis_title = 'Frequency(Hz)'
             y_axis_title = 'Gain(dB)'
         out.append(atype)
-        return out,to_process,signal,x_axis_title,y_axis_title
+        drops = None
+        if self.loadvar.get() == '10 Loads':
+            drops = 10
+        if self.loadvar.get() == '14 Loads':
+            drops = 14
+        if self.loadvar.get() == '28 Loads':
+            drops = 28
+        out.append(drops)
+        length = self.lenscale.get()
+        out.append(length)
+        return out,to_process,signal,drops,length,x_axis_title,y_axis_title
     # creates a list of r,l and c's to inspect and plot
     def get_todo(self, out, signal):
         '''
@@ -334,7 +344,9 @@ class MainMenu(Frame):
             for l in out[1]:
                 for c in out[2]:
                     for a in out[5]:
-                        todo.append(((r,l,c),out[3],signal,a))
+                        todo.append(((r,l,c),out[3],signal,a,out[6],out[7]))
+        for i in todo:
+            print i
         return todo
     # plots simple transient or bode plots
     def plot_simple(self, todo, title, x_axis_title, y_axis_title):
@@ -506,7 +518,7 @@ class MainMenu(Frame):
                         return str(round((num*(10**m)),3)) + conversion[m]
             #return str(round((num*(10**m)),2)) + conversion[m]
     # takes values and returns a key for self.folder_dict
-    def vals_to_key(self,rin,lin,cin,Cdrpin,signal,typein):
+    def vals_to_key(self,rin,lin,cin,Cdrpin,signal,typein, lenin, dropsin):
         '''
         rin         a float or string
         lin         a float or string
@@ -515,7 +527,7 @@ class MainMenu(Frame):
         signal      a string (Vin, Vn001, Vn014, Vn026, Vout)
         typein      a string (ac or trans)
         '''
-        return ('({r},{l},{c}),{cdrp},{sig},{tp}').format(r=rin, l=lin, c=cin, cdrp=Cdrpin, sig=signal, tp=typein)
+        return ('({r},{l},{c}),{cdrp},{sig},{tp},{len},{drops}').format(r=rin, l=lin, c=cin, cdrp=Cdrpin, sig=signal, tp=typein, len = lenin, drops = dropsin)
     # returns the element in list closest to val
     def findClosest(self,list,val):
         '''
