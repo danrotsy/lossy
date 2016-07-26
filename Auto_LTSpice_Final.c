@@ -138,12 +138,12 @@ int main(int argc, char* argv[])
 				strcat(filename_out, filename_buffer);
 			}
 			strcat(filename_out, ".raw");
-			printf("\r\033[A\033[A");
+			printf("\r\033[A\033[A\033[A");
 			printf("%45s\n", filename_out);
 			printf("%4.2f%% |", progress_percent);
 			for(int n=0; n < 100; n++) 
 				printf("%c", (n < progress_percent) ? '#' : '-');
-			printf("|");
+			printf("|\n");
 			fflush(stdout);
 			system(cmd_ltspice);
 			system("sleep 2");

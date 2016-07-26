@@ -225,6 +225,15 @@ class MainMenu(Frame):
             #
             self.plot_complex(todo, title, x_axis_title, y_axis_title)
     # returns the output of the gui in a comprehensible format (out,process)
+	def convert_key_and_run(self, out, signal):
+		key_list = get_todo(out, signal)
+		a #ac or tran
+		out[3] #cdrp
+		for key in key_list:
+			filename = 'transmission_line_{0}_dropoffs.cir'.format(key[5])
+			anal
+			cmd = './Auto_LTSpice_Now.exe {file} {analy} {cdrp} {len} {r} {l} {c}'.format(file=filename, analy=analysis, cdr=cdrp, len=lenline, r=r_arg, l=l_arg, c=c_arg)
+			
     def gui_out(self):
         '''
         returns the output of the gui in a comprehensible format (out,process)

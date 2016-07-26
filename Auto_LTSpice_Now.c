@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 	int is_tran = 0;
-	if((strcmp(argv[2], "true")==0) || (strcmp(argv[2], "True")==0))
+	if((strcmp(argv[2], "tran")==0) || (strcmp(argv[2], "TRAN")==0))
 		is_tran = 1;
 	
 	float cdrp_arg = str_to_expo(argv[3]);
