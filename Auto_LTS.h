@@ -111,6 +111,33 @@ int free_params(struct params *run)
 	return 0;
 }
 
+float str_to_expo(char *str)
+{
+	char *pch;
+	float expo = strtof(str, &pch);
+	switch(*pch) {
+		case 'Y': expo *= 1E24; break;
+		case 'Z': expo *= 1E21; break;
+		case 'E': expo *= 1E18; break;
+		case 'P': expo *= 1E15; break;
+		case 'T': expo *= 1E12; break;
+		case 'G': expo *= 1E9; break;
+		case 'M': expo *= 1E6; break;
+		case 'k': expo *= 1E3; break;
+		case 'd': expo *= 1E-1; break;
+		case 'c': expo *= 1E-2; break;
+		case 'm': expo *= 1E-3; break;
+		case 'u': expo *= 1E-6; break;
+		case 'n': expo *= 1E-9; break;
+		case 'p': expo *= 1E-12; break;
+		case 'f': expo *= 1E-15; break;
+		case 'a': expo *= 1E-18; break;
+		case 'z': expo *= 1E-21; break;
+		case 'y': expo *= 1E-24; break;
+	}
+	return expo;
+}
+
 /*
  * Converts a float in scientific notation
  * i.e. exponent notation into a string
