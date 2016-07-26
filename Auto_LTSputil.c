@@ -43,6 +43,7 @@ int main(int argc, char* argv[])
 	 * param line position don't matter.
 	 */
 	prepare_run(&run, tl_netlist, &tran, &ac, &param);
+	printf("\n");
 	for(unsigned int j=0; j < run.num_perm; j++) {
 		param_expo_to_str(&run, j);
 		/* 
@@ -67,12 +68,12 @@ int main(int argc, char* argv[])
 		 */
 		progress_percent = (float) (100*((double) j/run.num_perm));
 	
-		printf("\r\033[A");
+		printf("\r\033[A\033[A");
 		printf("%30s\n", filename_out);
 		printf("%4.2f%% |", progress_percent);
 		for(int n=0; n < 100; n++) 
 			printf("%c", (n < progress_percent) ? '#' : '-');
-		printf("|");
+		printf("|\n");
 		fflush(stdout);
 		
 		for(int n=0; n < 5; n++) {
@@ -122,6 +123,8 @@ int main(int argc, char* argv[])
 			system(cmd_ltsputil);
 			system("sleep 1");
 			system("cd ../..");
+			
+			system("Sleep 0.1");
 		}
 	}	
 	return 0;
