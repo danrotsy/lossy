@@ -147,12 +147,22 @@ class MainMenu(Frame):
         self.cdscalevar = IntVar()
         self.cdlabelvar = StringVar()
         self.cdlabelvar.set('0pF')
-        self.cdlabelstatic = Label(self, text = 'Cdrp')
+        self.cdlabelstatic = Label(self, text='Cdrp')
         self.cdlabelstatic.place(x=265, y=98)
         self.cdlabel = Label(self,textvariable=self.cdlabelvar)
         self.cdscale = Scale(self, from_=0, to_=5, variable = self.cdscalevar,command=self.update_cd)
         self.cdscale.place(x=310, y=98)
         self.cdlabel.place(x=420,y=98)
+
+        self.lenscalevar = IntVar()
+        self.lenlabelvar = StringVar()
+        self.lenlabelvar.set('0cm')
+        self.lenlabelstatic = Label(self, text='Length')
+        self.lenlabelstatic.place(x=265, y=128)
+        self.lenlabel = Label(self,textvariable=self.lenlabelvar)
+        self.lenscale = Scale(self, from_=0, to_=20, variable = self.lenscalevar,command=self.update_len)
+        self.lenscale.place(x=310, y=128)
+        self.lenlabel.place(x=420,y=128)
 
         self.errormsgvar = StringVar()
         self.errormsg = Label(self, textvariable=self.errormsgvar, foreground='red')
@@ -178,6 +188,9 @@ class MainMenu(Frame):
     def update_cd(self,val):
         self.cdlabelvar.set(str(int(round(float(val))))+'pF')
         self.cdscalevar.set(int(round(float(val))))
+    def update_len(self,val):
+        self.lenlabelvar.set(str(int(round(float(val))))+'cm')
+        self.lenscalevar.set(int(round(float(val))))
     # ==========================================================================
 
 
@@ -623,7 +636,7 @@ class MainMenu(Frame):
 
 if __name__ == '__main__':
     root = Tk()
-    root.geometry("445x150+300+300")
+    root.geometry("450x160+300+300")
     mainmenu = MainMenu(root)
     mainmenu.save()
     root.mainloop()
