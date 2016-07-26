@@ -156,11 +156,11 @@ class MainMenu(Frame):
 
         self.lenscalevar = IntVar()
         self.lenlabelvar = StringVar()
-        self.lenlabelvar.set('0cm')
+        self.lenlabelvar.set('1cm')
         self.lenlabelstatic = Label(self, text='Length')
         self.lenlabelstatic.place(x=265, y=128)
         self.lenlabel = Label(self,textvariable=self.lenlabelvar)
-        self.lenscale = Scale(self, from_=0, to_=20, variable = self.lenscalevar,command=self.update_len)
+        self.lenscale = Scale(self, from_=1, to_=20, variable = self.lenscalevar,command=self.update_len)
         self.lenscale.place(x=310, y=128)
         self.lenlabel.place(x=420,y=128)
 
