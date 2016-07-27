@@ -61,13 +61,10 @@ class MainMenu(Frame):
         instatiates main menu as a frame with Frame as parent and calls initUI()
         '''
 
-        self.R_low1 = self.sciToFloat("0.02")
-        self.R_high1 = self.sciToFloat("2.00")
-        self.R_low2 = self.sciToFloat("3.00")
-        self.R_high2 = self.sciToFloat("20.0")
+        self.R_low = self.sciToFloat("0.02")
+        self.R_high = self.sciToFloat("2")
         # self.R_high = self.sciToFloat("1.8")
-        self.R_step1 = self.sciToFloat("0.2")
-        self.R_step2 = self.sciToFloat("1.00")
+        self.R_step = self.sciToFloat("0.2")
 
         self.L_low = self.sciToFloat("0.079n")
         self.L_high = self.sciToFloat("7.9n")
@@ -79,29 +76,10 @@ class MainMenu(Frame):
         # self.C_high = self.sciToFloat("19.8p")
         self.C_step = self.sciToFloat("2.2p")
 
-        #each key will be formatted as such: (r, l, c), Cdrp, signal, ac/trans
-        #Ex. folder_dict[[(1.02, 1.659e-9, 2.42e-12), 1, "Vout", "trans"]] =
-        #r"MultidropTransient\Cdrp_1p_Vout\StepInformationRline=1.02Lline=1.659nCline=2.42pRun1491331.csv"
-        self.folder_dict = {}
-        #self.<X>vals lists will be in floats
-        self.Rvals = []
-        self.Rskinvals = []
-        self.Lvals = []
-        self.Cvals = []
-        #determine the Rvals, Lvals, and Cvals from a folder in the home directory
-        for r in arange(self.R_low1, self.R_high1, self.R_step1):
-            self.Rvals.append(r)
-        for r in arange(self.R_low2, self.R_high2, self.R_step2):
-            self.Rskinvals.append(r)
-        for l in arange(self.L_low, self.L_high, self.L_step):
-            self.Lvals.append(l)
-        for c in arange(self.C_low, self.C_high, self.C_step):
-            self.Cvals.append(c)
-
         Frame.__init__(self, parent)
         self.parent = parent
         self.initUI()
-        # self.createFileDict('')
+        self.createFileDict('')
     # sets up the GUI itself
     def initUI(self):
         '''
@@ -134,7 +112,7 @@ class MainMenu(Frame):
         self.rlabelvar.set('20mOhm/m')
         self.rlabel = Label(self, textvariable=self.rlabelvar)
         self.rlabel.place(x=235,y=5)
-        self.rscale = Scale(self, from_=0.02, to_=2.00, length=185, command=self.update_rlabel) #0.2
+        self.rscale = Scale(self, from_=0.02, to_=2, length=185, command=self.update_rlabel) #0.2
         self.rscale.place(x=50,y=5)
 
         self.llabelvar = StringVar()
@@ -153,23 +131,23 @@ class MainMenu(Frame):
 
         self.vilockvar = BooleanVar()
         vilock = Checkbutton(self, text="Vin", variable=self.vilockvar)
-        vilock.place(x=315,y=5)
+        vilock.place(x=310,y=5)
 
         self.dilockvar = BooleanVar()
         dilock = Checkbutton(self, text="First Drop", variable=self.dilockvar)
-        dilock.place(x=365,y=5)
+        dilock.place(x=360,y=5)
 
         self.dmlockvar = BooleanVar()
         dmlock = Checkbutton(self, text="Mid Drop", variable=self.dmlockvar)
-        dmlock.place(x=365,y=35)
+        dmlock.place(x=360,y=35)
 
         self.dflockvar = BooleanVar()
         dflock = Checkbutton(self, text="Last Drop", variable=self.dflockvar)
-        dflock.place(x=365,y=65)
+        dflock.place(x=360,y=65)
 
         self.volockvar = BooleanVar()
         volock = Checkbutton(self, text="Vout", variable=self.volockvar)
-        volock.place(x=315,y=35)
+        volock.place(x=310,y=35)
 
         self.cdscalevar = IntVar()
         self.cdlabelvar = StringVar()
@@ -182,7 +160,6 @@ class MainMenu(Frame):
         self.cdlabel.place(x=420,y=98)
 
         self.lenscalevar = IntVar()
-        self.lenscalevar.set(1)
         self.lenlabelvar = StringVar()
         self.lenlabelvar.set('1cm')
         self.lenlabelstatic = Label(self, text='Length')
@@ -205,6 +182,7 @@ class MainMenu(Frame):
         self.loadvar.set('10 Loads')
         self.loadlibary = OptionMenu(self, self.loadvar,'', '10 Loads', '14 Loads', '28 Loads')
         self.loadlibary.place(x=145,y=125)
+
     # updates r slider label
     def update_rlabel(self, val):
         #self.rlabelvar.set(round(float(val),1))
@@ -343,10 +321,6 @@ class MainMenu(Frame):
             atype.append('trans')
             x_axis_title = 'Frequency(Hz)'
             y_axis_title = 'Gain(dB)'
-        if to_process and (self.var.get() != 'Inverse'):
-            out[0] = self.Rvals
-            for val in self.Rskinvals:
-                out[0].append(val)
         out.append(atype)
         drops = None
         if self.loadvar.get() == '10 Loads':
@@ -360,6 +334,27 @@ class MainMenu(Frame):
         out.append(length)
         return out,to_process,signal,drops,length,x_axis_title,y_axis_title
     # creates a list of r,l and c's to inspect and plot
+	def convert_and_run(self, todo):
+        '''
+        afds
+        '''
+		key_list = todo
+		self.folder_dict = {}
+		for key in key_list:
+			filename = 'transmission_line_{}_dropoffs'.format(key[6])
+			if(key[3] == 'trans'):
+				analysis = 'tran'
+				path = 'Transient'
+			else:
+				analysis = 'ac'
+				path = 'Bode'
+			cdrp = '{}p'.format(key[1])
+			lenline = key[5]
+			cmd = './Auto_LTSpice_Now.exe {} {} {} {} {} {} {} {}'.format(filename, analysis, cdrp, lenline, key[0][0], key[0][1], key[0][2])
+			print(cmd)
+			os.system(cmd)
+			self.folder_dict[key] = '{}/Multidrop{}/{}_{}_{}_{}_{}_{}_{}_{}.csv'.format(filename, path, filename, analysis, key[0][0], key[0][1], key[0][2], cdrp, lenline, key[4])
+    #
     def get_todo(self, out, signal):
         '''
         creates a list of r,l and c's to inspect and plot
@@ -373,30 +368,6 @@ class MainMenu(Frame):
         for i in todo:
             print i
         return todo
-    #
-    def convert_and_run(self,todo):
-        '''
-        '''
-        key_list = todo
-        self.folder_dict = {} # (maybe it shouldn't be reset every time?)
-        for key in key_list:
-            filename = 'transmission_line_{}_dropoffs'.format(key[4])
-            if(key[3] == 'trans'):
-                analysis = 'tran'
-                path = 'Transient'
-            else:
-                analysis = 'ac'
-                path = 'Bode'
-            cdrp = '{}p'.format(key[1])
-            lenline = key[5]
-            cmd = 'Auto_LTSpice_Now.exe {} {} {} {} {} {} {} {}'.format(key[4], analysis, cdrp, lenline, key[0][0], key[0][1], key[0][2], key[2])
-            print
-            print 'COMMAND:'
-            print cmd
-            print
-            os.system(cmd)
-            self.folder_dict[key] = '{}/Multidrop{}/{}_{}_{}_{}_{}_{}_{}'.format(filename, path, analysis, key[0][0], key[0][1], key[0][2], cdrp, lenline, key[2])
-        print self.folder_dict
     # plots simple transient or bode plots
     def plot_simple(self, todo, title, x_axis_title, y_axis_title):
         '''
@@ -593,8 +564,23 @@ class MainMenu(Frame):
 
         returns a list of keys for every file in the folder, and a list of all the Rs, Ls and Cs
         '''
+        #each key will be formatted as such: (r, l, c), Cdrp, signal, ac/trans
+        #Ex. folder_dict[[(1.02, 1.659e-9, 2.42e-12), 1, "Vout", "trans"]] =
+        #r"MultidropTransient\Cdrp_1p_Vout\StepInformationRline=1.02Lline=1.659nCline=2.42pRun1491331.csv"
+        self.folder_dict = {}
+        #self.<X>vals lists will be in floats
+        self.Rvals = []
+        self.Lvals = []
+        self.Cvals = []
         dict_key = [0, 0, 0, 0]
         dict_rlc_tuple = (0,0,0)
+        #determine the Rvals, Lvals, and Cvals from a folder in the home directory
+        for r in arange(self.R_low, self.R_high, self.R_step):
+            self.Rvals.append(r)
+        for l in arange(self.L_low, self.L_high, self.L_step):
+            self.Lvals.append(l)
+        for c in arange(self.C_low, self.C_high, self.C_step):
+            self.Cvals.append(c)
         ###this changes the current directory to folder_name, so there wouldn't be directory to list named folder_name###
         ###os.chdir(folder_name)###
         for lib in ["MultidropBode", "MultidropTransient"]:
