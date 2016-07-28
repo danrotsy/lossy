@@ -37,6 +37,11 @@ try:
 except:
     print 'the "cPickle" library is required for this application'
 
+try:
+    import os
+except:
+    print 'the "os" library is required for this application'
+
 from numpy import arange
 # ==============================================================================
 
@@ -92,11 +97,11 @@ class MainMenu(Frame):
             self.Lvals.append(l)
         for c in arange(self.C_low, self.C_high, self.C_step):
             self.Cvals.append(c)
-
+        self.load()
         Frame.__init__(self, parent)
         self.parent = parent
         self.initUI()
-        self.createFileDict('')
+        # self.createFileDict('')
     # sets up the GUI itself
     def initUI(self):
         '''
@@ -200,7 +205,6 @@ class MainMenu(Frame):
         self.loadvar.set('10 Loads')
         self.loadlibary = OptionMenu(self, self.loadvar,'', '10 Loads', '14 Loads', '28 Loads')
         self.loadlibary.place(x=145,y=125)
-
     # updates r slider label
     def update_rlabel(self, val):
         #self.rlabelvar.set(round(float(val),1))
@@ -217,6 +221,7 @@ class MainMenu(Frame):
     def update_cd(self,val):
         self.cdlabelvar.set(str(int(round(float(val))))+'pF')
         self.cdscalevar.set(int(round(float(val))))
+    #
     def update_len(self,val):
         self.lenlabelvar.set(str(int(round(float(val))))+'cm')
         self.lenscalevar.set(int(round(float(val))))
@@ -240,6 +245,8 @@ class MainMenu(Frame):
         title = self.var.get().upper() + ' ' + signal.upper()+ '  Length: ' + str(length) + 'cm  Loads: ' + str(drops) + '\n'+ 'Cdrp=' + str(self.cdlabelvar.get())  + '  ' + self.get_name_tag()
         #
         todo = self.get_todo(out,signal)
+        #
+        self.convert_and_run(todo)
         #
         if to_process == False:
             #
@@ -390,9 +397,29 @@ class MainMenu(Frame):
                 for c in out[2]:
                     for a in out[5]:
                         todo.append(((r,l,c),out[3],signal,a,out[6],out[7]))
-        for i in todo:
-            print i
         return todo
+    #
+    def convert_and_run(self,todo):
+        '''
+        '''
+        key_list = todo
+        for key in key_list:
+            if key not in self.folder_dict.keys():
+                filename = 'transmission_line_{}_dropoffs'.format(key[4])
+                if(key[3] == 'trans'):
+                    analysis = 'tran'
+                    path = 'Transient'
+                else:
+                    analysis = 'ac'
+                    path = 'Bode'
+                cdrp = '{}p'.format(key[1])
+                lenline = key[5]
+                cmd = 'Auto_LTSpice_Now.exe {} {} {} {} {} {} {} {}'.format(key[4], analysis, cdrp, lenline, key[0][0], key[0][1], key[0][2], key[2])
+                os.system(cmd)
+                self.folder_dict[key] = '{}/Multidrop{}/{}_Rline={}_Lline={}_Cline={}_Cdrp={}_Lenline={}_{}.csv'.format(filename, path, analysis,
+                                                                                                        self.floatToSci(key[0][0]), self.floatToSci(key[0][1]), self.floatToSci(key[0][2]),
+                                                                                                        cdrp, lenline, key[2])
+        self.save()
     # plots simple transient or bode plots
     def plot_simple(self, todo, title, x_axis_title, y_axis_title):
         '''
@@ -551,16 +578,20 @@ class MainMenu(Frame):
             #     return str(round((num*(10**m)),2)) + conversion[m]
             # else:
             #     return str(num*(10**m)) + conversion[m]
-                if m<10:
-                    if num*(10**m)>=20.0:
-                        return str(int(num*(10**m))) + conversion[m]
-                    else:
-                        return str(round((num*(10**m)),3)) + conversion[m]
+                # if m<10:
+                if num*(10**m)>=10.0 and (num*(10**m)<100):
+                    return str(int(num*(10**m))) + '.' + conversion[m]
+                elif (num*(10**m)>=100):
+                    return str(int(num*(10**m))) + conversion[m]
                 else:
-                    if num*(10**m)>=25:
-                        return str(int(num*(10**m))) + conversion[m]
-                    else:
-                        return str(round((num*(10**m)),3)) + conversion[m]
+                    return str(round(((num*(10**m))),1)) + conversion[m]
+                # else:
+                #     return str(round((num*(10**m)),2)) + conversion[m]
+                # else:
+                #     if num*(10**m)>=25:
+                #         return str(int(num*(10**m))) + conversion[m]
+                #     else:
+                #         return str(round((num*(10**m)),3)) + conversion[m]
             #return str(round((num*(10**m)),2)) + conversion[m]
     # takes values and returns a key for self.folder_dict
     def vals_to_key(self,rin,lin,cin,Cdrpin,signal,typein, lenin, dropsin):
@@ -617,8 +648,19 @@ class MainMenu(Frame):
         '''
         saves folder_dict, Rvals, Lvals, and Cvals in a pickle file
         '''
-        with open(r"main_save.p", 'wb') as file:
-            pickle.dump([self.folder_dict,self.Rvals,self.Lvals,self.Cvals],file)
+        with open(r"main_save.p", 'wb') as open_file:
+            pickle.dump([self.folder_dict,self.Rvals,self.Lvals,self.Cvals],open_file)
+    #
+    def load(self):
+        '''
+        loads folder_dict, Rvals, Lvals, and Cvals from a pickle file
+        '''
+        with open(r"main_save.p", 'rb') as open_file:
+            load_list = pickle.load(open_file)
+            self.folder_dict = load_list[0]
+            self.Rvals = load_list[1]
+            self.Lvals = load_list[2]
+            self.Cvals = load_list[3]
     # ==========================================================================
 
 
@@ -695,5 +737,5 @@ if __name__ == '__main__':
     root = Tk()
     root.geometry("455x160+300+300")
     mainmenu = MainMenu(root)
-    mainmenu.save()
     root.mainloop()
+    mainmenu.save()

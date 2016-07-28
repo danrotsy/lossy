@@ -37,6 +37,14 @@ try:
 except:
     print 'the "cPickle" library is required for this application'
 
+<<<<<<< HEAD
+=======
+try:
+    import os
+except:
+    print 'the "os" library is required for this application'
+
+>>>>>>> 8e33a26b365e3fbe1c5c49efbb78a4e4e079ce72
 from numpy import arange
 # ==============================================================================
 
@@ -194,6 +202,10 @@ class MainMenu(Frame):
     def update_cd(self,val):
         self.cdlabelvar.set(str(int(round(float(val))))+'pF')
         self.cdscalevar.set(int(round(float(val))))
+<<<<<<< HEAD
+=======
+    #
+>>>>>>> 8e33a26b365e3fbe1c5c49efbb78a4e4e079ce72
     def update_len(self,val):
         self.lenlabelvar.set(str(int(round(float(val))))+'cm')
         self.lenscalevar.set(int(round(float(val))))
@@ -218,6 +230,11 @@ class MainMenu(Frame):
         #
         todo = self.get_todo(out,signal)
         #
+<<<<<<< HEAD
+=======
+        self.convert_and_run(todo)
+        #
+>>>>>>> 8e33a26b365e3fbe1c5c49efbb78a4e4e079ce72
         if to_process == False:
             #
             self.plot_simple(todo, title, x_axis_title, y_axis_title)
@@ -326,10 +343,21 @@ class MainMenu(Frame):
         out.append(length)
         return out,to_process,signal,drops,length,x_axis_title,y_axis_title
     # creates a list of r,l and c's to inspect and plot
+<<<<<<< HEAD
 	def convert_and_run(self, out, signal):
 		key_list = get_todo(self, out, signal)
 		self.folder_dict = {}
 		for key in key_list:
+=======
+	def convert_and_run(self, todo):
+        '''
+        afds
+        '''
+		key_list = todo
+		self.folder_dict = {}
+		for key in key_list:
+			filename = 'transmission_line_{}_dropoffs'.format(key[6])
+>>>>>>> 8e33a26b365e3fbe1c5c49efbb78a4e4e079ce72
 			if(key[3] == 'trans'):
 				analysis = 'tran'
 				path = 'Transient'
@@ -338,11 +366,19 @@ class MainMenu(Frame):
 				path = 'Bode'
 			cdrp = '{}p'.format(key[1])
 			lenline = key[5]
+<<<<<<< HEAD
 			cmd = './Auto_LTSpice_Now.exe {} {} {} {} {} {} {} {}'.format(key[6], analysis, cdrp, lenline, key[0][0], key[0][1], key[0][2], key[4])
 			print(cmd)
 			os.system(cmd)
 			self.folder_dict[key] = '{}/Multidrop{}/{}_{}_{}_{}_{}_{}_{}_{}.csv'.format(filename, path, filename, analysis, key[0][0], key[0][1], key[0][2], cdrp, lenline, key[4])
 		
+=======
+			cmd = './Auto_LTSpice_Now.exe {} {} {} {} {} {} {} {}'.format(filename, analysis, cdrp, lenline, key[0][0], key[0][1], key[0][2])
+			print(cmd)
+			os.system(cmd)
+			self.folder_dict[key] = '{}/Multidrop{}/{}_{}_{}_{}_{}_{}_{}_{}.csv'.format(filename, path, filename, analysis, key[0][0], key[0][1], key[0][2], cdrp, lenline, key[4])
+    #
+>>>>>>> 8e33a26b365e3fbe1c5c49efbb78a4e4e079ce72
     def get_todo(self, out, signal):
         '''
         creates a list of r,l and c's to inspect and plot
