@@ -42,7 +42,7 @@ R2 Out OutRef {Rterm}
 ;step param Cline 0.22p 22p 2.2p
 ;step param Cdrp 1p 5p 1p
 ;step param Lenline 1.0 10.0 1.0
-.param  Cdrp=  1.0p  Rterm =sqrt(Lline/Cline) Lenline=  5.0  Rline=  1.8m Lline=  2.4n Cline=  20.p 
+.param  Cdrp=  1.0p  Rterm =sqrt(Lline/Cline) Lenline=  1.0  Rline=  20.m Lline=  79.p Cline=  220f 
 .save V(Out) V(N001) V(N011) V(N010) V(N020) V(N006) V(N016) V(InPulse)
 .model LossyTL  LTRA(len=Lenline R=Rline L=Lline C=Cline)
 .backanno
