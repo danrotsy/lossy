@@ -151,8 +151,8 @@ int main(int argc, char* argv[])
 	if(fseek(tl_netlist, param_pos, SEEK_SET))
 		perror("Error in param fseek");
 	fgets(buffer, 255, tl_netlist);
-	printf("Buffer: %d\n", *buffer);
-	printf("Translating command-line arguments to floats...\n");
+	printf("Buffer: %s\n", buffer);
+	printf("Translating parameter floats to strings...\n");
 	expo_to_str(run.ext_param_str[0], r_arg);
 	expo_to_str(run.ext_param_str[1], l_arg);
 	expo_to_str(run.ext_param_str[2], c_arg);
@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
 	for(int k=0; k < run.num_param; k++) {
 		printf("run.ext_param_str[k]: %s\n", run.ext_param_str[k]);
 		p_ch = buffer + run.ext_param_index[k];
-		printf("p_ch: %d\n", *p_ch);
+		printf("p_ch: %s\n", p_ch);
 		memcpy(p_ch+1, run.ext_param_str[k], strlen(run.ext_param_str[k]));
 	}
 	printf("Completed buffer: %s", buffer);

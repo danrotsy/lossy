@@ -147,14 +147,18 @@ float str_to_expo(char *str)
 int expo_to_str(char *str, float expo)
 {
 	char *pch;
-	char buffer[10];
+	char buffer[255];
+	char buffer2[255];
 	float significand;
 	int exp;
-	sprintf(str, "%E", expo);
-	strcpy(buffer, str);
-	strtok(buffer, "E");
+	sprintf(buffer, "%E", expo);
+	buffer[8] = 'X';
+	printf("buffer & expo: %s %E\n", buffer, expo);
+	strcpy(buffer2, buffer);
 	significand = strtof(buffer, &pch);
+	printf("sig: %f pch+1: %s\n", significand, pch+1);
 	exp = (int) strtol(pch+1, NULL, 10);
+	printf("exp: %d\n", exp);
 	if(exp % 3) {
 		if(exp > 6) {
 			significand *= pow(10, exp-6);
@@ -198,6 +202,7 @@ int expo_to_str(char *str, float expo)
 		case 6: strcpy(str+3, "Meg"); break;
 		default: strcpy(str+3, ""); printf("Error in exp_to_str in switch statement!\n"); return 1;
 	}
+	printf("finished str: %s\n", str);
 	return 0;
 }
 	

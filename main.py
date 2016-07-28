@@ -97,7 +97,6 @@ class MainMenu(Frame):
             self.Lvals.append(l)
         for c in arange(self.C_low, self.C_high, self.C_step):
             self.Cvals.append(c)
-        self.save()
         self.load()
         Frame.__init__(self, parent)
         self.parent = parent
@@ -371,15 +370,12 @@ class MainMenu(Frame):
                 for c in out[2]:
                     for a in out[5]:
                         todo.append(((r,l,c),out[3],signal,a,out[6],out[7]))
-        for i in todo:
-            print i
         return todo
     #
     def convert_and_run(self,todo):
         '''
         '''
         key_list = todo
-        self.folder_dict = {} # (maybe it shouldn't be reset every time?)
         for key in key_list:
             if key not in self.folder_dict.keys():
                 filename = 'transmission_line_{}_dropoffs'.format(key[4])
@@ -392,16 +388,11 @@ class MainMenu(Frame):
                 cdrp = '{}p'.format(key[1])
                 lenline = key[5]
                 cmd = 'Auto_LTSpice_Now.exe {} {} {} {} {} {} {} {}'.format(key[4], analysis, cdrp, lenline, key[0][0], key[0][1], key[0][2], key[2])
-                print
-                print 'COMMAND:'
-                print cmd
-                print
-                print 'FILE PATH:'
-                print '{}/Multidrop{}/{}_{}_{}_{}_{}_{}_{}'.format(filename, path, analysis, key[0][0], key[0][1], key[0][2], cdrp, lenline, key[2])
-                print
                 os.system(cmd)
-                self.folder_dict[key] = '{}/Multidrop{}/{}_{}_{}_{}_{}_{}_{}'.format(filename, path, analysis, key[0][0], key[0][1], key[0][2], cdrp, lenline, key[2])
-        print self.folder_dict
+                self.folder_dict[key] = '{}/Multidrop{}/{}_Rline={}_Lline={}_Cline={}_Cdrp={}_Lenline={}_{}.csv'.format(filename, path, analysis,
+                                                                                                        self.floatToSci(key[0][0]), self.floatToSci(key[0][1]), self.floatToSci(key[0][2]),
+                                                                                                        cdrp, lenline, key[2])
+        self.save()
     # plots simple transient or bode plots
     def plot_simple(self, todo, title, x_axis_title, y_axis_title):
         '''
@@ -560,16 +551,20 @@ class MainMenu(Frame):
             #     return str(round((num*(10**m)),2)) + conversion[m]
             # else:
             #     return str(num*(10**m)) + conversion[m]
-                if m<10:
-                    if num*(10**m)>=20.0:
-                        return str(int(num*(10**m))) + conversion[m]
-                    else:
-                        return str(round((num*(10**m)),3)) + conversion[m]
+                # if m<10:
+                if num*(10**m)>=10.0 and (num*(10**m)<100):
+                    return str(int(num*(10**m))) + '.' + conversion[m]
+                elif (num*(10**m)>=100):
+                    return str(int(num*(10**m))) + conversion[m]
                 else:
-                    if num*(10**m)>=25:
-                        return str(int(num*(10**m))) + conversion[m]
-                    else:
-                        return str(round((num*(10**m)),3)) + conversion[m]
+                    return str(round(((num*(10**m))),1)) + conversion[m]
+                # else:
+                #     return str(round((num*(10**m)),2)) + conversion[m]
+                # else:
+                #     if num*(10**m)>=25:
+                #         return str(int(num*(10**m))) + conversion[m]
+                #     else:
+                #         return str(round((num*(10**m)),3)) + conversion[m]
             #return str(round((num*(10**m)),2)) + conversion[m]
     # takes values and returns a key for self.folder_dict
     def vals_to_key(self,rin,lin,cin,Cdrpin,signal,typein, lenin, dropsin):
