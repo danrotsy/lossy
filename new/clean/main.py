@@ -97,12 +97,6 @@ class MainMenu(Frame):
             self.Lvals.append(l)
         for c in arange(self.C_low, self.C_high, self.C_step):
             self.Cvals.append(c)
-        try:
-            self.load()
-        except EOFError:
-            print 'empty'
-        except:
-            print 'wrong indentation'
         Frame.__init__(self, parent)
         self.parent = parent
         self.initUI()
@@ -194,7 +188,7 @@ class MainMenu(Frame):
         self.lenlabelstatic = Label(self, text='Length')
         self.lenlabelstatic.place(x=265, y=128)
         self.lenlabel = Label(self,textvariable=self.lenlabelvar)
-        self.lenscale = Scale(self, from_=1, to_=20, variable = self.lenscalevar,command=self.update_len)
+        self.lenscale = Scale(self, from_=1, to_=9, variable = self.lenscalevar,command=self.update_len)
         self.lenscale.place(x=310, y=128)
         self.lenlabel.place(x=420,y=128)
 
@@ -398,7 +392,6 @@ class MainMenu(Frame):
                 self.folder_dict[key] = '../data/{}/Multidrop{}/{}_Rline={}_Lline={}_Cline={}_Cdrp={}_Lenline={}_{}.csv'.format(filename, path, analysis,
                                                                                                         self.floatToSci(key[0][0]), self.floatToSci(key[0][1]), self.floatToSci(key[0][2]),
                                                                                                         cdrp, lenline, key[2])
-        self.save()
     # plots simple transient or bode plots
     def plot_simple(self, todo, title, x_axis_title, y_axis_title):
         '''
