@@ -90,17 +90,23 @@ class MainMenu(Frame):
         self.Cvals = []
         #determine the Rvals, Lvals, and Cvals from a folder in the home directory
         for r in arange(self.R_low1, self.R_high1, self.R_step1):
-            self.Rvals.append(self.shorten(r))
+            self.Rvals.append(r)
         for r in arange(self.R_low2, self.R_high2, self.R_step2):
-            self.Rskinvals.append(self.shorten(r))
+            self.Rskinvals.append(r)
         for l in arange(self.L_low, self.L_high, self.L_step):
-            self.Lvals.append(self.shorten(l))
+            self.Lvals.append(l)
         for c in arange(self.C_low, self.C_high, self.C_step):
-            self.Cvals.append(self.shorten(c))
+            self.Cvals.append(c)
         Frame.__init__(self, parent)
         self.parent = parent
         self.initUI()
         self.createFileDict()
+        for key in self.folder_dict:
+            print
+            print 'KEY:', key
+            print 'DIR:', self.folder_dict[key]
+            print
+        print 'FOLDER_DICT SIZE:', len(self.folder_dict)
     # sets up the GUI itself
     def initUI(self):
         '''
