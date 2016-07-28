@@ -97,10 +97,10 @@ class MainMenu(Frame):
             self.Lvals.append(l)
         for c in arange(self.C_low, self.C_high, self.C_step):
             self.Cvals.append(c)
+        self.save()
         self.load()
         Frame.__init__(self, parent)
         self.parent = parent
-        self.parent.protocol("WM_DELETE_WINDOW", self.save())
         self.initUI()
         # self.createFileDict('')
     # sets up the GUI itself
@@ -715,5 +715,5 @@ if __name__ == '__main__':
     root = Tk()
     root.geometry("455x160+300+300")
     mainmenu = MainMenu(root)
-    mainmenu.save()
     root.mainloop()
+    mainmenu.save()
