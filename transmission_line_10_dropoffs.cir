@@ -45,8 +45,7 @@ R2 Out OutRef {Rterm}
 <<<<<<< HEAD
 .param  Cdrp=2.0p   Rterm =sqrt(Lline/Cline) Lenline=10.    Rline=20.   Lline=79.n    Cline=22.p
 =======
-.param  Cdrp=1.0p   Rterm =sqrt(Lline/Cline) Lenline=5.0    Rline=220m  Lline=79.p    Cline=220f
->>>>>>> 8e33a26b365e3fbe1c5c49efbb78a4e4e079ce72
+.param  Cdrp=1.0p   Rterm =sqrt(Lline/3.2n   Lenline=1.0    Rline=1.8    line=3.2n    Cline=6.8p   >>>>>> 8e33a26b365e3fbe1c5c49efbb78a4e4e079ce72
 .save V(Out) V(N001) V(N011) V(N010) V(N020) V(N006) V(N016) V(InPulse)
 .model LossyTL  LTRA(len=Lenline R=Rline L=Lline C=Cline)
 .backanno
