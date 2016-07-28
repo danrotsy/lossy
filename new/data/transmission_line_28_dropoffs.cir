@@ -84,14 +84,13 @@ R17 InRefPulse 0 100k
 V2 InPulse InRefPulse PULSE(0 1 0 2n 2n 16n) AC 1 Rser=0
 R2 Out OutRef {Rterm}
 .model LossyTL  LTRA(len=Lenline R=Rline L=Lline C=Cline)
-.tran 0 100n
-;ac oct 50 10k 1000Meg
+;tran 0 100n
+.ac oct 50 10k 1000Meg
 ;step param Rline 0.02 2 0.2
 ;step param Lline 0.079n 7.9n 0.79n
 ;step param Cline 0.22p 22p 2.2p
 ;step param Cdrp 1p 5p 1p
 ;step param Lenline 1.0 10.0 1.0
-.param  Cdrp 1.0p  Rterm =sqrt(Lline/Cline) Lenline=5.0 Rline=20.m Lline=7.9n  Cline=22.p
-.save V(Out) V(N001) V(N027) V(N014) V(N040) V(N026)  V(N052) V(InPulse
+.param  Cdrp   1.0pRterm =sqrt(Lline/  79.p Lenline=  1.0line=  20.mline=  79.pCline=  220fsave V(Out) V(N001) V(N027) V(N014) V(N040) V(N026)  V(N052) V(InPulse
 .backanno
 .end

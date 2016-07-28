@@ -82,25 +82,25 @@ class MainMenu(Frame):
         #each key will be formatted as such: (r, l, c), Cdrp, signal, ac/trans
         #Ex. folder_dict[[(1.02, 1.659e-9, 2.42e-12), 1, "Vout", "trans"]] =
         #r"MultidropTransient\Cdrp_1p_Vout\StepInformationRline=1.02Lline=1.659nCline=2.42pRun1491331.csv"
-        self.folder_dict = {}
         #self.<X>vals lists will be in floats
+        # self.folder_dict = {}
         self.Rvals = []
         self.Rskinvals = []
         self.Lvals = []
         self.Cvals = []
         #determine the Rvals, Lvals, and Cvals from a folder in the home directory
         for r in arange(self.R_low1, self.R_high1, self.R_step1):
-            self.Rvals.append(r)
+            self.Rvals.append(self.shorten(r))
         for r in arange(self.R_low2, self.R_high2, self.R_step2):
-            self.Rskinvals.append(r)
+            self.Rskinvals.append(self.shorten(r))
         for l in arange(self.L_low, self.L_high, self.L_step):
-            self.Lvals.append(l)
+            self.Lvals.append(self.shorten(l))
         for c in arange(self.C_low, self.C_high, self.C_step):
-            self.Cvals.append(c)
+            self.Cvals.append(self.shorten(c))
         Frame.__init__(self, parent)
         self.parent = parent
         self.initUI()
-        # self.createFileDict('')
+        self.createFileDict()
     # sets up the GUI itself
     def initUI(self):
         '''
@@ -152,23 +152,23 @@ class MainMenu(Frame):
 
         self.vilockvar = BooleanVar()
         vilock = Checkbutton(self, text="Vin", variable=self.vilockvar)
-        vilock.place(x=315,y=5)
+        vilock.place(x=320,y=5)
 
         self.dilockvar = BooleanVar()
         dilock = Checkbutton(self, text="First Drop", variable=self.dilockvar)
-        dilock.place(x=365,y=5)
+        dilock.place(x=370,y=5)
 
         self.dmlockvar = BooleanVar()
         dmlock = Checkbutton(self, text="Mid Drop", variable=self.dmlockvar)
-        dmlock.place(x=365,y=35)
+        dmlock.place(x=370,y=35)
 
         self.dflockvar = BooleanVar()
         dflock = Checkbutton(self, text="Last Drop", variable=self.dflockvar)
-        dflock.place(x=365,y=65)
+        dflock.place(x=370,y=65)
 
         self.volockvar = BooleanVar()
         volock = Checkbutton(self, text="Vout", variable=self.volockvar)
-        volock.place(x=315,y=35)
+        volock.place(x=320,y=35)
 
         self.cdscalevar = IntVar()
         self.cdscalevar.set(1)
@@ -248,6 +248,7 @@ class MainMenu(Frame):
         #
         self.convert_and_run(todo)
         #
+        print "found files"
         if to_process == False:
             #
             self.plot_simple(todo, title, x_axis_title, y_axis_title)
@@ -370,6 +371,8 @@ class MainMenu(Frame):
                 for c in out[2]:
                     for a in out[5]:
                         todo.append(((r,l,c),out[3],signal,a,out[6],out[7]))
+        for item in todo:
+            print item
         return todo
     #
     def convert_and_run(self,todo):
@@ -392,6 +395,9 @@ class MainMenu(Frame):
                 self.folder_dict[key] = '../data/{}/Multidrop{}/{}_Rline={}_Lline={}_Cline={}_Cdrp={}_Lenline={}_{}.csv'.format(filename, path, analysis,
                                                                                                         self.floatToSci(key[0][0]), self.floatToSci(key[0][1]), self.floatToSci(key[0][2]),
                                                                                                         cdrp, lenline, key[2])
+                print "COMMAND:", cmd
+                print "KEY:", key
+                print "FOLDER_DICT", self.folder_dict[key]
     # plots simple transient or bode plots
     def plot_simple(self, todo, title, x_axis_title, y_axis_title):
         '''
@@ -547,16 +553,18 @@ class MainMenu(Frame):
         num = float(num)
         for m in range(0,16,3):
             if num*(10**m)>=1:
+                num = '%3.1f' %(num*(10**m))
+                return str(num) + conversion[m]
             #     return str(round((num*(10**m)),2)) + conversion[m]
             # else:
             #     return str(num*(10**m)) + conversion[m]
                 # if m<10:
-                if num*(10**m)>=10.0 and (num*(10**m)<100):
-                    return str(int(num*(10**m))) + '.' + conversion[m]
-                elif (num*(10**m)>=100):
-                    return str(int(num*(10**m))) + conversion[m]
-                else:
-                    return str(round(((num*(10**m))),1)) + conversion[m]
+                # if num*(10**m)>=10.0 and (num*(10**m)<100):
+                #     return str(int(num*(10**m))) + '.' + conversion[m]
+                # elif (num*(10**m)>=100):
+                #     return str(int(num*(10**m))) + conversion[m]
+                # else:
+                #     return str(round(((num*(10**m))),1)) + conversion[m]
                 # else:
                 #     return str(round((num*(10**m)),2)) + conversion[m]
                 # else:
@@ -565,6 +573,12 @@ class MainMenu(Frame):
                 #     else:
                 #         return str(round((num*(10**m)),3)) + conversion[m]
             #return str(round((num*(10**m)),2)) + conversion[m]
+    #
+    def shorten(self, num):
+        '''
+        '''
+        strnum = self.floatToSci(num)
+        return self.sciToFloat(strnum)
     # takes values and returns a key for self.folder_dict
     def vals_to_key(self,rin,lin,cin,Cdrpin,signal,typein, lenin, dropsin):
         '''
@@ -586,35 +600,52 @@ class MainMenu(Frame):
         '''
         return min(list, key=(lambda x:abs(x-val)))
     # returns a list of keys for every file in the folder, and a list of all the Rs, Ls and Cs
-    def createFileDict(self, folder_name):
-        '''
-        folder_name:the path of the folder to be scanned
+    def createFileDict(self):
+    	'''
+    	folder_name:the path of the folder to be scanned
 
-        returns a list of keys for every file in the folder, and a list of all the Rs, Ls and Cs
-        '''
-        dict_key = [0, 0, 0, 0]
-        dict_rlc_tuple = (0,0,0)
-        ###this changes the current directory to folder_name, so there wouldn't be directory to list named folder_name###
-        ###os.chdir(folder_name)###
-        for lib in ["MultidropBode", "MultidropTransient"]:
-            if lib == "MultidropBode":
-                dict_key[3] = "ac"
-            elif lib == "MultidropTransient":
-                dict_key[3] = "trans"
-            else:
-                dict_key[3] = "error in lib"
-            for signal in ["Vout", "Vn001", "Vn014", "Vn026"]:
-                dict_key[2] = signal
-                for cdrp in ["0p", "1p", "2p", "3p", "4p", "5p"]:
-                    dict_key[1] = int(cdrp[0])
-                    for r in self.Rvals:
-                        for l in self.Lvals:
-                            for c in self.Cvals:
-                                dict_key[0] = (r, l, c)
-                                perm_dict_key = tuple(dict_key)
-                                self.folder_dict[perm_dict_key] =r"{var_actrans}\Cdrp_{var_cdrp}_{var_signal}\StepInformationRline={var_r}Lline={var_l}Cline={var_c}.csv".format(var_actrans=lib, var_cdrp=cdrp, var_signal=signal, var_r=self.floatToSci(r), var_l=self.floatToSci(l), var_c=self.floatToSci(c))
+    	returns a list of keys for every file in the folder, and a list of all the Rs, Ls and Cs
+    	'''
+    	folder_dict = {}
+    	dict_key = [0, 0, 0, 0]
+    	dict_rlc_tuple = (0,0,0)
+    	###this changes the current directory to folder_name, so there wouldn't be directory to list named folder_name###
+    	###os.chdir(folder_name)###
+    	file_list = []
+    	var = []
+    	for a in [10, 14, 28]:
+    		for b in ["Bode", "Transient"]:
+    			path = "../data/transmission_line_{}_dropoffs/Multidrop{}".format(a, b)
+    			for f in os.listdir(path):
+    				if f[-3:] == "csv":
+    					var = []
+    					file_list.append(os.path.join("../data", f))
+    					for d in f.split('=')[1:]:
+    						curr_index = 0
+    						for char in d:
+    							if char == "_":
+    								break
+    							curr_index += 1
+    						var.append( d[:curr_index] )
 
-        return self.folder_dict
+    					if f[0] == "t":
+    						analy = "tran"
+    					else:
+    						analy = "ac"
+    					if f[-7:-4] == "out":
+    						signal = "Vout"
+    					elif f[-7:-4] == "rst":
+    						signal = "Vfirst"
+    					elif f[-7:-4] == "ast":
+    						signal = "Vlast"
+    					elif f[-7:-4] == "dle":
+    						signal = "Vmiddle"
+    					else:
+    						signal = "Vin"
+    					tuple = (var[0], var[1], var[2])
+    					tuple2 = (tuple, var[3], signal, analy, a, var[4])
+    					folder_dict[tuple2] = file_list[-1]
+        self.folder_dict = folder_dict
     # saves folder_dict, Rvals, Lvals, and Cvals in a pickle file
     def save(self):
         '''
@@ -707,7 +738,7 @@ class MainMenu(Frame):
 
 if __name__ == '__main__':
     root = Tk()
-    root.geometry("455x160+300+300")
+    root.geometry("460x160+300+300")
     mainmenu = MainMenu(root)
     root.mainloop()
     mainmenu.save()
