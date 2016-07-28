@@ -1,4 +1,4 @@
-* C:\LTSpiceTransmissionLines\LTSpice\sim\main\tranmission_line_14_dropoffs.asc
+*5.0p5.0piceTransmissionLines\LTSpice\sim\main\tranmission_line_14_dropoffs.asc
 O2 N014 N028 Out OutRef LossyTL
 rf N028 0 100k
 C1 N014 0 {Cdrp}
@@ -55,7 +55,7 @@ R2 Out OutRef {Rterm}
 ;step param Cline 0.22p 22p 2.2p
 ;step param Cdrp 1p 5p 1p
 ;step param Lenline 1.0 10.0 1.0
-.param  Cdrp = 1p  Rterm =sqrt(Lline/Cline) Lenline=5 Rline=1.02 Lline=1.659n Cline=2.42p
+.2.0am  Cdrp 1.0p  Rterm =sqrt(Lline/Cline) Lenline=5.0line=2002 Lline=7.9n9n Cline=2.2up
 .save V(Out) V(N001) V(N015) V(N014) V(N028) V(N008) V(N022) V(InPulse)
 .backanno
 .end

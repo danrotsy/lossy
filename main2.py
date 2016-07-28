@@ -225,15 +225,6 @@ class MainMenu(Frame):
             #
             self.plot_complex(todo, title, x_axis_title, y_axis_title)
     # returns the output of the gui in a comprehensible format (out,process)
-	def convert_key_and_run(self, out, signal):
-		key_list = get_todo(out, signal)
-		a #ac or tran
-		out[3] #cdrp
-		for key in key_list:
-			filename = 'transmission_line_{0}_dropoffs.cir'.format(key[5])
-			anal
-			cmd = './Auto_LTSpice_Now.exe {file} {analy} {cdrp} {len} {r} {l} {c}'.format(file=filename, analy=analysis, cdr=cdrp, len=lenline, r=r_arg, l=l_arg, c=c_arg)
-			
     def gui_out(self):
         '''
         returns the output of the gui in a comprehensible format (out,process)
@@ -339,7 +330,6 @@ class MainMenu(Frame):
 		key_list = get_todo(self, out, signal)
 		self.folder_dict = {}
 		for key in key_list:
-			filename = 'transmission_line_{}_dropoffs'.format(key[4])
 			if(key[3] == 'trans'):
 				analysis = 'tran'
 				path = 'Transient'
@@ -348,10 +338,10 @@ class MainMenu(Frame):
 				path = 'Bode'
 			cdrp = '{}p'.format(key[1])
 			lenline = key[5]
-			cmd = './Auto_LTSpice_Now.exe {} {} {} {} {} {} {} {}'.format(filename, analysis, cdrp, lenline, key[0][0], key[0][1], key[0][2])
+			cmd = './Auto_LTSpice_Now.exe {} {} {} {} {} {} {} {}'.format(key[6], analysis, cdrp, lenline, key[0][0], key[0][1], key[0][2], key[4])
 			print(cmd)
 			os.system(cmd)
-			self.folder_dict[key] = '{}/Multidrop{}/{}_{}_{}_{}_{}_{}_{}.csv'.format(filename, path, filename, analysis, key[0][0], key[0][1], key[0][2], cdrp, lenline)
+			self.folder_dict[key] = '{}/Multidrop{}/{}_{}_{}_{}_{}_{}_{}_{}.csv'.format(filename, path, filename, analysis, key[0][0], key[0][1], key[0][2], cdrp, lenline, key[4])
 		
     def get_todo(self, out, signal):
         '''
