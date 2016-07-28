@@ -1,0 +1,7 @@
+#Title: *5.0pLTSpiceTransmissionLines\LTSpice\sim\main\tranmission_line_10_dropoffs.asc
+#Date: Thu Jul 28 09:31:50 2016
+#Plotname: Transient Analysis
+#Variables(): time V(out) 
+#Ltsputil: -xo2
+#DataColumns: 2
+#InfoLines: 12

@@ -8,7 +8,6 @@
 #include<math.h>
 #include<ctype.h>
 #include<sys/stat.h>
-#include<dirent.h>
 
 /*
  * This struct stores the information
@@ -218,6 +217,7 @@ int generate_data_array(float low, float high, float step, float *step_array)
 		step_array[n] = tmp;
 		tmp += step;
 	}
+	return 0;
 }
 
 /* 
@@ -252,8 +252,6 @@ int update_run(struct params *run)
 	}
 	else
 		return 0;
-
-	return 0;
 }
 
 /*
@@ -271,7 +269,7 @@ int prepare_run(struct params *run, FILE* tl_netlist, long *tran_pos, long *ac_p
 	char *p_end;
 	int param_index = 0;
 	int data_index = 0;
-	long tmp_pos;
+	long tmp_pos = 0;
 	float tmp_data = 0;
 	
 	while(!feof(tl_netlist)) {

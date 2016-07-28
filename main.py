@@ -97,9 +97,10 @@ class MainMenu(Frame):
             self.Lvals.append(l)
         for c in arange(self.C_low, self.C_high, self.C_step):
             self.Cvals.append(c)
-
+        self.load()
         Frame.__init__(self, parent)
         self.parent = parent
+        self.parent.protocol("WM_DELETE_WINDOW", self.save())
         self.initUI()
         # self.createFileDict('')
     # sets up the GUI itself
@@ -380,22 +381,26 @@ class MainMenu(Frame):
         key_list = todo
         self.folder_dict = {} # (maybe it shouldn't be reset every time?)
         for key in key_list:
-            filename = 'transmission_line_{}_dropoffs'.format(key[4])
-            if(key[3] == 'trans'):
-                analysis = 'tran'
-                path = 'Transient'
-            else:
-                analysis = 'ac'
-                path = 'Bode'
-            cdrp = '{}p'.format(key[1])
-            lenline = key[5]
-            cmd = 'Auto_LTSpice_Now.exe {} {} {} {} {} {} {} {}'.format(key[4], analysis, cdrp, lenline, key[0][0], key[0][1], key[0][2], key[2])
-            print
-            print 'COMMAND:'
-            print cmd
-            print
-            os.system(cmd)
-            self.folder_dict[key] = '{}/Multidrop{}/{}_{}_{}_{}_{}_{}_{}'.format(filename, path, analysis, key[0][0], key[0][1], key[0][2], cdrp, lenline, key[2])
+            if key not in self.folder_dict.keys():
+                filename = 'transmission_line_{}_dropoffs'.format(key[4])
+                if(key[3] == 'trans'):
+                    analysis = 'tran'
+                    path = 'Transient'
+                else:
+                    analysis = 'ac'
+                    path = 'Bode'
+                cdrp = '{}p'.format(key[1])
+                lenline = key[5]
+                cmd = 'Auto_LTSpice_Now.exe {} {} {} {} {} {} {} {}'.format(key[4], analysis, cdrp, lenline, key[0][0], key[0][1], key[0][2], key[2])
+                print
+                print 'COMMAND:'
+                print cmd
+                print
+                print 'FILE PATH:'
+                print '{}/Multidrop{}/{}_{}_{}_{}_{}_{}_{}'.format(filename, path, analysis, key[0][0], key[0][1], key[0][2], cdrp, lenline, key[2])
+                print
+                os.system(cmd)
+                self.folder_dict[key] = '{}/Multidrop{}/{}_{}_{}_{}_{}_{}_{}'.format(filename, path, analysis, key[0][0], key[0][1], key[0][2], cdrp, lenline, key[2])
         print self.folder_dict
     # plots simple transient or bode plots
     def plot_simple(self, todo, title, x_axis_title, y_axis_title):
@@ -621,8 +626,19 @@ class MainMenu(Frame):
         '''
         saves folder_dict, Rvals, Lvals, and Cvals in a pickle file
         '''
-        with open(r"main_save.p", 'wb') as file:
-            pickle.dump([self.folder_dict,self.Rvals,self.Lvals,self.Cvals],file)
+        with open(r"main_save.p", 'wb') as open_file:
+            pickle.dump([self.folder_dict,self.Rvals,self.Lvals,self.Cvals],open_file)
+    #
+    def load(self):
+        '''
+        loads folder_dict, Rvals, Lvals, and Cvals from a pickle file
+        '''
+        with open(r"main_save.p", 'rb') as open_file:
+            load_list = pickle.load(open_file)
+            self.folder_dict = load_list[0]
+            self.Rvals = load_list[1]
+            self.Lvals = load_list[2]
+            self.Cvals = load_list[3]
     # ==========================================================================
 
 
