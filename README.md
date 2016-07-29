@@ -3,7 +3,7 @@ Used for modeling of transmission lines in ATLAS Detector, "lossy" is transmissi
 
 
 # Synopsis
-First, it generates a 10GB library with spice for transmission line data according to any number of desired specs:
+First, it generates a 10GB library with LTSpice for transmission line data according to any number of desired specs:
   - resistance/m, capacitance/m, inductance/m
   - number of dropoffs
   - length of wire
@@ -19,8 +19,11 @@ Then, using convolution, it analyzes the following:
 
 # Links
 http://www.hep.upenn.edu/HEP_website_09/
+
 http://atlas.cern/
+
 https://home.cern/about/experiments/atlas
+
 http://virtual-tours.web.cern.ch/virtual-tours/vtours/ATLAS/ATLAS.html
 
 # Authors
