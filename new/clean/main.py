@@ -257,7 +257,9 @@ class MainMenu(Frame):
         #
         self.convert_and_run(todo)
         #
-        print "found files"
+        print
+        print "FOUND FILES"
+        print
         if to_process == False:
             #
             self.plot_simple(todo, title, x_axis_title, y_axis_title)
@@ -334,19 +336,19 @@ class MainMenu(Frame):
             x_axis_title = 'Frequency(Hz)'
             y_axis_title = 'Gain(dB)'
         if self.var.get() == 'Transient':
-            atype.append('trans')
+            atype.append('tran')
             x_axis_title = 'Time(s)'
             y_axis_title = 'Voltage(V)'
         if (self.var.get() == 'Inverse') or (self.var.get() == 'Skin Depth') or (self.var.get() == 'Skin Depth Inv.'):
             to_process = True
             atype.append('ac')
-            atype.append('trans')
+            atype.append('tran')
             x_axis_title = 'Time(s)'
             y_axis_title = 'Voltage(V)'
         if (self.var.get() == 'Skin Depth Bode'):
             to_process = True
             atype.append('ac')
-            atype.append('trans')
+            atype.append('tran')
             x_axis_title = 'Frequency(Hz)'
             y_axis_title = 'Gain(dB)'
         if to_process and (self.var.get() != 'Inverse'):
@@ -375,7 +377,7 @@ class MainMenu(Frame):
             for l in out[1]:
                 for c in out[2]:
                     for a in out[5]:
-                        todo.append(((self.floatToSci(r),self.floatToSci(l),self.floatToSci(c)),out[3],signal,a,out[6],out[7]))
+                        todo.append(((self.floatToSci(r),self.floatToSci(l),self.floatToSci(c)),str(out[3]) + 'p',signal,a,out[6],str(out[7])))
         print
         print 'TODO:'
         for item in todo:
@@ -386,21 +388,22 @@ class MainMenu(Frame):
     def convert_and_run(self,todo):
         '''
         '''
-        key_list = todo
-        for key in key_list:
+        for key in todo:
             if key not in self.folder_dict.keys():
                 filename = 'transmission_line_{}_dropoffs'.format(key[4])
-                if(key[3] == 'trans'):
+                if(key[3] == 'tran'):
                     analysis = 'tran'
                     path = 'Transient'
+                    analysiskey = 'tran'
                 else:
                     analysis = 'ac'
                     path = 'Bode'
-                cdrp = '{}p'.format(key[1])
+                    analysiskey = 'ac'
+                cdrp = '{}'.format(key[1])
                 lenline = key[5]
                 cmd = 'Auto_LTSpice_Now.exe {} {} {} {} {} {} {} {}'.format(key[4], analysis, cdrp, lenline, key[0][0], key[0][1], key[0][2], key[2])
                 os.system(cmd)
-                self.folder_dict[key] = '../data/{}/Multidrop{}/{}_Rline={}_Lline={}_Cline={}_Cdrp={}_Lenline={}_{}.csv'.format(filename, path, analysis, key[0][0], key[0][1],key[0][2],cdrp,lenline,key[2]) #self.floatToSci(key[0][0]), self.floatToSci(key[0][1]), self.floatToSci(key[0][2]),cdrp, lenline, key[2])
+                self.folder_dict[key] = '../data/{}/Multidrop{}/{}_Rline={}_Lline={}_Cline={}_Cdrp={}_Lenline={}_{}.csv'.format(filename, path, analysiskey, key[0][0], key[0][1],key[0][2],cdrp,lenline,key[2]) #self.floatToSci(key[0][0]), self.floatToSci(key[0][1]), self.floatToSci(key[0][2]),cdrp, lenline, key[2])
                 print "COMMAND:", cmd
                 print "KEY:", key
                 print "FOLDER_DICT", self.folder_dict[key]
@@ -440,7 +443,7 @@ class MainMenu(Frame):
         for item in todo:
             if item[3] == 'ac':
                 selected_ac.append(self.folder_dict[item])
-            if item[3] == 'trans':
+            if item[3] == 'tran':
                 selected_trans.append(self.folder_dict[item])
         for trans in selected_trans:
             t,v,amp,freq = bode.trans_fourier(trans, False, res)
@@ -620,7 +623,7 @@ class MainMenu(Frame):
     			for f in os.listdir(path):
     				if f[-3:] == "csv":
     					var = []
-    					file_list.append(os.path.join("../data", f))
+    					file_list.append(os.path.join(path, f))
     					for d in f.split('=')[1:]:
     						curr_index = 0
     						for char in d:

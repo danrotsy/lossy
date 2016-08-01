@@ -75,7 +75,7 @@ def vals_to_key(rin,lin,cin,Cdrpin,signal,typein):
     signal      a string (Vin, Vn001, Vn014, Vn026, Vout)
     typein      a string (ac or trans)
     '''
-    r_tuple = (rin,lin,cin)
+    r_tuple = (sciToFloat(rin),lin,cin)
     return (r_tuple,Cdrpin,signal,typein)
 # finds the resistance due to skin effect at a given frequency
 def get_r(frequency):
@@ -107,6 +107,19 @@ def get_main_save():
         lvals = main_save_list[2]
         cvals = main_save_list[3]
     return folder_dict, rvals, lvals, cvals
+# returns a string with the same value as the float in scientific notation
+def floatToSci(self, num):
+    '''
+    num:  a float
+
+    returns a string with the same value as the float in scientific notation
+    '''
+    conversion = {0:'',3:'m',6:'u',9:'n',12:'p',15:'f'}
+    num = float(num)
+    for m in range(0,16,3):
+        if num*(10**m)>=1:
+            num = '%3.1f' %(num*(10**m))
+            return str(num) + conversion[m]
 # ==============================================================================
 
 
