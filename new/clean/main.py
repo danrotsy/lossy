@@ -18,7 +18,7 @@ except ImportError:
     print 'the "Tkinter" library is required for this application'
 
 try:
-    from ttk import Frame, Button, Scale, OptionMenu, Label, Checkbutton
+    from ttk import Frame, Button, Scale, OptionMenu, Label, Checkbutton, Entry
 except ImportError:
     print 'the "ttk" library is required for this application'
 
@@ -204,6 +204,14 @@ class MainMenu(Frame):
         self.libary = OptionMenu(self, self.var,'', 'Transient', 'Bode', 'Inverse', 'Skin Depth', 'Skin Depth Bode', 'Skin Depth Inv.')
         self.libary.place(x=145,y=95)
 
+        self.widthlabel1 = Label(self,text='W:')
+        self.widthlabel2 = Label(self,text='(um)')
+        self.widthvar = StringVar(self)
+        self.widthentry = Entry(self, width=3, textvariable=self.widthvar)
+        self.widthlabel1.place(x=5, y=95)
+        self.widthentry.place(x=25, y=95)
+        self.widthlabel2.place(x=50,y=95)
+
         self.loadvar = StringVar(self)
         self.loadvar.set('10 Loads')
         self.loadlibary = OptionMenu(self, self.loadvar,'', '10 Loads', '14 Loads', '28 Loads')
@@ -247,15 +255,15 @@ class MainMenu(Frame):
         #
         todo = self.get_todo(out,signal)
         #
-        # self.convert_and_run(todo)
-        # #
-        # print "found files"
-        # if to_process == False:
-        #     #
-        #     self.plot_simple(todo, title, x_axis_title, y_axis_title)
-        # else:
-        #     #
-        #     self.plot_complex(todo, title, x_axis_title, y_axis_title)
+        self.convert_and_run(todo)
+        #
+        print "found files"
+        if to_process == False:
+            #
+            self.plot_simple(todo, title, x_axis_title, y_axis_title)
+        else:
+            #
+            self.plot_complex(todo, title, x_axis_title, y_axis_title)
     # returns the output of the gui in a comprehensible format (out,process)
     def gui_out(self):
         '''
