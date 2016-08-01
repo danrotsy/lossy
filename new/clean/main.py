@@ -107,6 +107,7 @@ class MainMenu(Frame):
             print 'DIR:', self.folder_dict[key]
             print
         print 'FOLDER_DICT SIZE:', len(self.folder_dict)
+        print
     # sets up the GUI itself
     def initUI(self):
         '''
@@ -376,9 +377,12 @@ class MainMenu(Frame):
             for l in out[1]:
                 for c in out[2]:
                     for a in out[5]:
-                        todo.append(((r,l,c),out[3],signal,a,out[6],out[7]))
+                        todo.append(((self.floatToSci(r),self.floatToSci(l),self.floatToSci(c)),out[3],signal,a,out[6],out[7]))
+        print
+        print 'TODO:'
         for item in todo:
             print item
+        print
         return todo
     #
     def convert_and_run(self,todo):
@@ -398,9 +402,7 @@ class MainMenu(Frame):
                 lenline = key[5]
                 cmd = 'Auto_LTSpice_Now.exe {} {} {} {} {} {} {} {}'.format(key[4], analysis, cdrp, lenline, key[0][0], key[0][1], key[0][2], key[2])
                 os.system(cmd)
-                self.folder_dict[key] = '../data/{}/Multidrop{}/{}_Rline={}_Lline={}_Cline={}_Cdrp={}_Lenline={}_{}.csv'.format(filename, path, analysis,
-                                                                                                        self.floatToSci(key[0][0]), self.floatToSci(key[0][1]), self.floatToSci(key[0][2]),
-                                                                                                        cdrp, lenline, key[2])
+                self.folder_dict[key] = '../data/{}/Multidrop{}/{}_Rline={}_Lline={}_Cline={}_Cdrp={}_Lenline={}_{}.csv'.format(filename, path, analysis, key[0][0], key[0][1],key[0][2],cdrp,lenline,key[2]) #self.floatToSci(key[0][0]), self.floatToSci(key[0][1]), self.floatToSci(key[0][2]),cdrp, lenline, key[2])
                 print "COMMAND:", cmd
                 print "KEY:", key
                 print "FOLDER_DICT", self.folder_dict[key]
