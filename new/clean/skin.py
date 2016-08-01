@@ -33,11 +33,11 @@ except ImportError:
 # Skin Effect Single Transfer Functions
 # ------------------------------------------------------------------------------
 # the general function that returns a specific transfer function for given l,c
-def get_skin_transfer_func(folder_dict,rvals,l,c,Cdrpin,res,freq_domain):
+def get_skin_transfer_func(folder_dict,rvals,l,c,Cdrpin,signal,drops,lenline,res,freq_domain):
     '''
     the general function that returns a specific transfer function for given l,c
     '''
-    transfer_functions = get_r_functions(folder_dict,rvals,l,c,Cdrpin,res)
+    transfer_functions = get_r_functions(folder_dict,rvals,l,c,Cdrpin,signal,drops,lenline,res)
     return transpose(transfer_functions, rvals, freq_domain)
 # overlays transfer functions of different r's to simulate skin effect
 def transpose(transfer_functions, rvals, freq_domain):
@@ -54,19 +54,19 @@ def transpose(transfer_functions, rvals, freq_domain):
         skin_func[2].append(bode.get_val(func[0],func[2], f))
     return skin_func
 # gets all transfer functions with given l and c varying through r
-def get_r_functions(folder_dict,rvals,l,c,Cdrpin,res):
+def get_r_functions(folder_dict,rvals,l,c,Cdrpin,signal,drops,lenline,res):
     '''
     gets all transfer functions with given l and c varying through r
     '''
     approximations = {}
     transfer_functions = {}
     for r in rvals:
-        approximations[round(r,2)] = folder_dict[vals_to_key(r,l,c,Cdrpin,"Vout","ac")]
+        approximations[round(r,2)] = folder_dict[vals_to_key(r,l,c,Cdrpin,signal,"ac",drops,lenline)]
     for r in rvals:
         transfer_functions[round(r,2)] = bode.transfer_function(approximations[round(r,2)],res)
     return transfer_functions
 # given values, finds the key for folder_dict for the file with the given values
-def vals_to_key(rin,lin,cin,Cdrpin,signal,typein):
+def vals_to_key(rin,lin,cin,Cdrpin,signal,typein,drops,lenline):
     '''
     rin         a float or string
     lin         a float or string
@@ -75,8 +75,8 @@ def vals_to_key(rin,lin,cin,Cdrpin,signal,typein):
     signal      a string (Vin, Vn001, Vn014, Vn026, Vout)
     typein      a string (ac or trans)
     '''
-    r_tuple = (sciToFloat(rin),lin,cin)
-    return (r_tuple,Cdrpin,signal,typein)
+    r_tuple = (floatToSci(rin),lin,cin)
+    return (r_tuple,Cdrpin,signal,typein,drops,lenline)
 # finds the resistance due to skin effect at a given frequency
 def get_r(frequency):
     '''
@@ -108,7 +108,7 @@ def get_main_save():
         cvals = main_save_list[3]
     return folder_dict, rvals, lvals, cvals
 # returns a string with the same value as the float in scientific notation
-def floatToSci(self, num):
+def floatToSci(num):
     '''
     num:  a float
 
@@ -120,6 +120,23 @@ def floatToSci(self, num):
         if num*(10**m)>=1:
             num = '%3.1f' %(num*(10**m))
             return str(num) + conversion[m]
+    # returns a float of the same value as the original scientific notation
+def sciToFloat(sci_string):
+    '''
+    sci_string: a string in scientific notation
+
+    returns a float of the same value as the original scientific notation
+    '''
+    conversion = {"":0,"m":-3,"u":-6,"n":-9,"p":-12,"f":-15}
+    multiplier = ''
+    num = ''
+    for c in sci_string:
+        if c in '0123456789' or c=='.':
+            num += c
+        else:
+            multiplier += c
+    out = float(num)*(10**conversion[multiplier])
+    return out
 # ==============================================================================
 
 

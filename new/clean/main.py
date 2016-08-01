@@ -475,7 +475,7 @@ class MainMenu(Frame):
                 t,v,amp,freq = t_list[i],v_list[i],amp_list[i],freq_list[i]
                 color_list.append((color,0,1-color))
                 color += color_step
-                skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], res, bode.genrange(1.0e9,100))
+                skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], res, bode.genrange(1.0e9,100))
                 new_amp = bode.apply_transfer_func(freq, amp, inv_list[i])
                 new_amp = bode.apply_transfer_func(freq, new_amp, skin_depth_transfer_func)
                 new_v = bode.inv_fourier(freq, new_amp)
@@ -484,7 +484,7 @@ class MainMenu(Frame):
             self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title, color_list)
         if (self.var.get() == 'Skin Depth Bode'):
             color_list.append((color,0,1-color))
-            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], res, bode.genrange(1.0e9,100))
+            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], res, bode.genrange(1.0e9,100))
             skin_depth_transfer_func = bode.to_dB(skin_depth_transfer_func)
             x_list.append(skin_depth_transfer_func[0])
             y_list.append(skin_depth_transfer_func[1])
@@ -494,7 +494,7 @@ class MainMenu(Frame):
                 t,v,amp,freq = t_list[i],v_list[i],amp_list[i],freq_list[i]
                 color_list.append((color,0,1-color))
                 color += color_step
-                skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], 2048, bode.genrange(1.0e9,100))
+                skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], 2048, bode.genrange(1.0e9,100))
                 skin_depth_transfer_func_inv = bode.invert_known_transfer_function(skin_depth_transfer_func)
                 new_amp = bode.apply_transfer_func(freq, amp, inv_list[i])
                 new_amp = bode.apply_transfer_func(freq, new_amp, skin_depth_transfer_func_inv)
