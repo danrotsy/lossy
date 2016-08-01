@@ -122,7 +122,7 @@ class MainMenu(Frame):
         self.pack(fill=BOTH, expand=1)
 
         plotButton = Button(self, text="Plot", command=self.gui_to_plots, width= 20)
-        plotButton.place(x=5, y=95)
+        plotButton.place(x=5, y=125)
 
         self.rlockvar = BooleanVar()
         rlock = Checkbutton(self, text="R", variable=self.rlockvar)
@@ -199,10 +199,6 @@ class MainMenu(Frame):
         self.lenscale.place(x=310, y=128)
         self.lenlabel.place(x=420,y=128)
 
-        self.errormsgvar = StringVar()
-        self.errormsg = Label(self, textvariable=self.errormsgvar, foreground='red')
-        self.errormsg.place(x=5,y=125)
-
         self.var = StringVar(self)
         self.var.set('Transient')
         self.libary = OptionMenu(self, self.var,'', 'Transient', 'Bode', 'Inverse', 'Skin Depth', 'Skin Depth Bode', 'Skin Depth Inv.')
@@ -245,23 +241,21 @@ class MainMenu(Frame):
         finds and plots all files given info on the gui
         '''
         #
-        self.errormsgvar.set('')
-        #
         out,to_process,signal,length,drops,x_axis_title,y_axis_title = self.gui_out()
         #
         title = self.var.get().upper() + ' ' + signal.upper()+ '  Length: ' + str(length) + 'cm  Loads: ' + str(drops) + '\n'+ 'Cdrp=' + str(self.cdlabelvar.get())  + '  ' + self.get_name_tag()
         #
         todo = self.get_todo(out,signal)
         #
-        self.convert_and_run(todo)
-        #
-        print "found files"
-        if to_process == False:
-            #
-            self.plot_simple(todo, title, x_axis_title, y_axis_title)
-        else:
-            #
-            self.plot_complex(todo, title, x_axis_title, y_axis_title)
+        # self.convert_and_run(todo)
+        # #
+        # print "found files"
+        # if to_process == False:
+        #     #
+        #     self.plot_simple(todo, title, x_axis_title, y_axis_title)
+        # else:
+        #     #
+        #     self.plot_complex(todo, title, x_axis_title, y_axis_title)
     # returns the output of the gui in a comprehensible format (out,process)
     def gui_out(self):
         '''
@@ -307,10 +301,8 @@ class MainMenu(Frame):
             signal = 'Vout'
             changed += 1
         if changed == 0:
-            self.errormsgvar.set('must enter a signal')
             return None
         if changed > 1:
-            self.errormsgvar.set('cannot scan more than one node')
             self.vilockvar.set(False)
             self.dilockvar.set(False)
             self.dmlockvar.set(False)
@@ -318,7 +310,6 @@ class MainMenu(Frame):
             self.volockvar.set(False)
             return None
         if signal == 'Vin':
-            self.errormsgvar.set('the "vin" libraries are coming soon...')
             self.vilockvar.set(False)
             self.dilockvar.set(False)
             self.dmlockvar.set(False)
@@ -326,7 +317,6 @@ class MainMenu(Frame):
             self.volockvar.set(False)
             return None
         if self.cdscale.get() == 0:
-            self.errormsgvar.set('the bus libraries are coming soon...')
             return None
         out.append(signal)
         atype = []
@@ -458,7 +448,6 @@ class MainMenu(Frame):
         color_list = []
         #
         if (self.var.get() == 'Inverse'):
-            self.errormsgvar.set('this may take a moment...')
             for i in range(0, len(t_list)):
                 t,v,amp,freq = t_list[i],v_list[i],amp_list[i],freq_list[i]
                 color_list.append((color,0,1-color))
@@ -469,7 +458,6 @@ class MainMenu(Frame):
                 new_v = bode.inv_fourier(freq,new_amp)
                 x_list.append(bode.genrange(1e-7,len(new_v)))
                 y_list.append(new_v)
-            self.errormsgvar.set('')
             self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title, color_list)
         if (self.var.get() == 'Skin Depth'):
             for i in range(0, len(t_list)):
@@ -482,7 +470,6 @@ class MainMenu(Frame):
                 new_v = bode.inv_fourier(freq, new_amp)
                 x_list.append(bode.genrange(1e-7,len(new_v)))
                 y_list.append(new_v)
-            self.errormsgvar.set('')
             self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title, color_list)
         if (self.var.get() == 'Skin Depth Bode'):
             color_list.append((color,0,1-color))
@@ -490,7 +477,6 @@ class MainMenu(Frame):
             skin_depth_transfer_func = bode.to_dB(skin_depth_transfer_func)
             x_list.append(skin_depth_transfer_func[0])
             y_list.append(skin_depth_transfer_func[1])
-            self.errormsgvar.set('')
             self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title, color_list)
         if (self.var.get() == 'Skin Depth Inv.'):
             for i in range(0, len(t_list)):
@@ -505,7 +491,6 @@ class MainMenu(Frame):
                 new_v = bode.inv_fourier(freq, new_amp)
                 x_list.append(bode.genrange(1e-7,len(new_v)))
                 y_list.append(new_v)
-            self.errormsgvar.set('')
             self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title, color_list)
     # returns r,l,c description for title
     def get_name_tag(self):
