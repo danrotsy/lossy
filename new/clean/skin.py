@@ -101,6 +101,7 @@ def get_r(frequency):
     d = get_depth(frequency)
     w = 100e-6
     h = 18e-6
+    print 'Frequency',frequency, "r", p/((2*w*d)+(2*h*d)-(4*d*d))
     return p/((2*w*d)+(2*h*d)-(4*d*d))
 # finds the skin depth due the skin effect at a given frequency
 def get_depth(frequency):
