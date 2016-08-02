@@ -144,21 +144,21 @@ class MainMenu(Frame):
         clock.place(x=5,y=65)
 
         self.rlabelvar = StringVar()
-        self.rlabelvar.set('20mOhm/m')
+        self.rlabelvar.set('20mOhm/cm')
         self.rlabel = Label(self, textvariable=self.rlabelvar)
         self.rlabel.place(x=235,y=5)
         self.rscale = Scale(self, from_=0.02, to_=2.00, length=185, command=self.update_rlabel) #0.2
         self.rscale.place(x=50,y=5)
 
         self.llabelvar = StringVar()
-        self.llabelvar.set('100pH/m')
+        self.llabelvar.set('100pH/cm')
         self.llabel = Label(self, textvariable=self.llabelvar)
         self.llabel.place(x=235,y=35)
         self.lscale = Scale(self, from_=0.079*(10**-9), to_=7.9*(10**-9), length=185, command=self.update_llabel) #0.79n
         self.lscale.place(x=50,y=35)
 
         self.clabelvar = StringVar()
-        self.clabelvar.set('200fF/m')
+        self.clabelvar.set('200fF/cm')
         self.clabel = Label(self, textvariable=self.clabelvar)
         self.clabel.place(x=235,y=65)
         self.cscale = Scale(self, from_=0.22*(10**-12), to_=22*(10**-12), length=185, command=self.update_clabel) #2.2p
@@ -253,15 +253,15 @@ class MainMenu(Frame):
     # updates r slider label
     def update_rlabel(self, val):
         #self.rlabelvar.set(round(float(val),1))
-        self.rlabelvar.set(str(self.floatToSci(val)+'Ohm/m'))
+        self.rlabelvar.set(str(self.floatToSci(val)+'Ohm/cm'))
     # updates l slider label
     def update_llabel(self, val):
         #self.llabelvar.set(round(float(val),10))
-        self.llabelvar.set(str(self.floatToSci(val)+'H/m'))
+        self.llabelvar.set(str(self.floatToSci(val)+'H/cm'))
     # updates c slider label
     def update_clabel(self, val):
         #self.clabelvar.set(round(float(val),13))
-        self.clabelvar.set(str(self.floatToSci(val)+'F/m'))
+        self.clabelvar.set(str(self.floatToSci(val)+'F/cm'))
     # updates Cdrp slider label
     def update_cd(self,val):
         self.cdlabelvar.set(str(int(round(float(val))))+'pF')
@@ -411,7 +411,7 @@ class MainMenu(Frame):
             for l in out[1]:
                 for c in out[2]:
                     for a in out[5]:
-                        todo.append(((self.floatToSci(r),self.floatToSci(l),self.floatToSci(c)),str(out[3]) + 'p',signal,a,out[6],str(out[7])))
+                        todo.append(((self.floatToSci(r),self.floatToSci(l),self.floatToSci(c)),str(out[3]) + 'p',signal,a,out[6],str(out[7])),self.get_logic_string())
         print
         print 'TODO:'
         for item in todo:
@@ -635,6 +635,18 @@ class MainMenu(Frame):
         returns the element in list closest to val
         '''
         return min(list, key=(lambda x:abs(x-val)))
+    #
+    def get_logic_string(self):
+        '''
+        '''
+        logic_string = ''
+        logic_string += self.bitlibrary1.get()
+        logic_string += self.bitlibrary2.get()
+        logic_string += self.bitlibrary3.get()
+        logic_string += self.bitlibrary4.get()
+        logic_string += self.bitlibrary5.get()
+        return logic_string
+
     # returns a list of keys for every file in the folder, and a list of all the Rs, Ls and Cs
     def createFileDict(self):
     	'''
