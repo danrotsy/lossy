@@ -118,11 +118,18 @@ class MainMenu(Frame):
         instantiates r, l and c sliders
         instantiates option menu
         '''
-        self.parent.title("Transmission Lines")
+        self.parent.title("Lossy")
         self.pack(fill=BOTH, expand=1)
 
         plotButton = Button(self, text="Plot", command=self.gui_to_plots, width= 20)
-        plotButton.place(x=5, y=125)
+        plotButton.place(x=5, y=155)
+
+        self.widthlabel = Label(self, text='Thickness')
+        self.widthlabel.place(x=5, y=128)
+        self.widthvar = StringVar(self)
+        self.widthvar.set('18um')
+        self.widthlibrary = OptionMenu(self, self.widthvar, '', '9um', '27um', '36um', '45um', '54um', '63um', '72um', '81um', '90um', '99um')
+        self.widthlibrary.place(x=70, y=125)
 
         self.rlockvar = BooleanVar()
         rlock = Checkbutton(self, text="R", variable=self.rlockvar)
@@ -182,40 +189,67 @@ class MainMenu(Frame):
         self.cdlabelvar = StringVar()
         self.cdlabelvar.set('1pF')
         self.cdlabelstatic = Label(self, text='Cdrp')
-        self.cdlabelstatic.place(x=265, y=98)
+        self.cdlabelstatic.place(x=265, y=128)
         self.cdlabel = Label(self,textvariable=self.cdlabelvar)
         self.cdscale = Scale(self, from_=1, to_=5, variable = self.cdscalevar,command=self.update_cd)
-        self.cdscale.place(x=310, y=98)
-        self.cdlabel.place(x=420,y=98)
+        self.cdscale.place(x=310, y=128)
+        self.cdlabel.place(x=420,y=128)
 
         self.lenscalevar = IntVar()
         self.lenscalevar.set(1)
         self.lenlabelvar = StringVar()
         self.lenlabelvar.set('1cm')
         self.lenlabelstatic = Label(self, text='Length')
-        self.lenlabelstatic.place(x=265, y=128)
+        self.lenlabelstatic.place(x=265, y=158)
         self.lenlabel = Label(self,textvariable=self.lenlabelvar)
         self.lenscale = Scale(self, from_=1, to_=9, variable = self.lenscalevar,command=self.update_len)
-        self.lenscale.place(x=310, y=128)
-        self.lenlabel.place(x=420,y=128)
+        self.lenscale.place(x=310, y=158)
+        self.lenlabel.place(x=420,y=158)
+
+        self.logiclabel = Label(self, text='Logic')
+        self.logiclabel.place(x=5,y=98)
+
+        self.bitvar1 = StringVar(self)
+        self.bitvar1.set('0')
+        self.bitlibrary1 = OptionMenu(self, self.bitvar1, '', '0', '1')
+        self.bitlibrary1.place(x=45,y=95)
+
+        self.bitvar2 = StringVar(self)
+        self.bitvar2.set('0')
+        self.bitlibrary2 = OptionMenu(self, self.bitvar2, '', '0', '1')
+        self.bitlibrary2.place(x=95,y=95)
+
+        self.bitvar3 = StringVar(self)
+        self.bitvar3.set('0')
+        self.bitlibrary3 = OptionMenu(self, self.bitvar3, '', '0', '1')
+        self.bitlibrary3.place(x=145,y=95)
+
+        self.bitvar4 = StringVar(self)
+        self.bitvar4.set('0')
+        self.bitlibrary4 = OptionMenu(self, self.bitvar4, '', '0', '1')
+        self.bitlibrary4.place(x=195,y=95)
+
+        self.bitvar5 = StringVar(self)
+        self.bitvar5.set('0')
+        self.bitlibrary5 = OptionMenu(self, self.bitvar5, '', '0', '1')
+        self.bitlibrary5.place(x=245,y=95)
 
         self.var = StringVar(self)
         self.var.set('Transient')
         self.libary = OptionMenu(self, self.var,'', 'Transient', 'Bode', 'Inverse', 'Skin Depth', 'Skin Depth Bode', 'Skin Depth Inv.')
-        self.libary.place(x=145,y=95)
+        self.libary.place(x=145,y=125)
 
-        self.widthlabel1 = Label(self,text='W:')
-        self.widthlabel2 = Label(self,text='(um)')
-        self.widthvar = StringVar(self)
-        self.widthentry = Entry(self, width=3, textvariable=self.widthvar)
-        self.widthlabel1.place(x=5, y=95)
-        self.widthentry.place(x=25, y=95)
-        self.widthlabel2.place(x=50,y=95)
+        self.reslabel = Label(self, text='Transform Res.')
+        self.reslabel.place(x=320,y=98)
+        self.resvar = StringVar(self)
+        self.resvar.set('64')
+        self.reslibrary = OptionMenu(self, self.resvar, '', '64', '128', '256', '512', '1024', '2048', '4096')
+        self.reslibrary.place(x=405,y=95)
 
         self.loadvar = StringVar(self)
         self.loadvar.set('10 Loads')
         self.loadlibary = OptionMenu(self, self.loadvar,'', '10 Loads', '14 Loads', '28 Loads')
-        self.loadlibary.place(x=145,y=125)
+        self.loadlibary.place(x=145,y=155)
     # updates r slider label
     def update_rlabel(self, val):
         #self.rlabelvar.set(round(float(val),1))
@@ -428,7 +462,7 @@ class MainMenu(Frame):
         '''
         plots transient or bode plots after transforms are applied
         '''
-        res = 4096
+        res = int(self.resvar.get())
         selected_ac = []
         selected_trans = []
         low_pass_filter = bode.low_pass_filter(8e8,1e9)
@@ -471,16 +505,15 @@ class MainMenu(Frame):
                 y_list.append(new_v)
             self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title, color_list)
         if (self.var.get() == 'Skin Depth'):
-            for i in range(0, len(t_list)):
-                t,v,amp,freq = t_list[i],v_list[i],amp_list[i],freq_list[i]
-                color_list.append((color,0,1-color))
-                color += color_step
-                skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], res, bode.genrange(1.0e9,100))
-                new_amp = bode.apply_transfer_func(freq, amp, inv_list[i])
-                new_amp = bode.apply_transfer_func(freq, new_amp, skin_depth_transfer_func)
-                new_v = bode.inv_fourier(freq, new_amp)
-                x_list.append(bode.genrange(1e-7,len(new_v)))
-                y_list.append(new_v)
+            t,v,amp,freq = t_list[0],v_list[0],amp_list[0],freq_list[0]
+            color_list.append((color,0,1-color))
+            color += color_step
+            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], res, bode.genrange(1.0e9,100))
+            new_amp = bode.apply_transfer_func(freq, amp, inv_list[0])
+            new_amp = bode.apply_transfer_func(freq, new_amp, skin_depth_transfer_func)
+            new_v = bode.inv_fourier(freq, new_amp)
+            x_list.append(bode.genrange(1e-7,len(new_v)))
+            y_list.append(new_v)
             self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title, color_list)
         if (self.var.get() == 'Skin Depth Bode'):
             color_list.append((color,0,1-color))
@@ -490,18 +523,17 @@ class MainMenu(Frame):
             y_list.append(skin_depth_transfer_func[1])
             self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title, color_list)
         if (self.var.get() == 'Skin Depth Inv.'):
-            for i in range(0, len(t_list)):
-                t,v,amp,freq = t_list[i],v_list[i],amp_list[i],freq_list[i]
-                color_list.append((color,0,1-color))
-                color += color_step
-                skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], 2048, bode.genrange(1.0e9,100))
-                skin_depth_transfer_func_inv = bode.invert_known_transfer_function(skin_depth_transfer_func)
-                new_amp = bode.apply_transfer_func(freq, amp, inv_list[i])
-                new_amp = bode.apply_transfer_func(freq, new_amp, skin_depth_transfer_func_inv)
-                new_amp = bode.apply_transfer_func(freq, new_amp, low_pass_filter)
-                new_v = bode.inv_fourier(freq, new_amp)
-                x_list.append(bode.genrange(1e-7,len(new_v)))
-                y_list.append(new_v)
+            t,v,amp,freq = t_list[0],v_list[0],amp_list[0],freq_list[0]
+            color_list.append((color,0,1-color))
+            color += color_step
+            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], res, bode.genrange(1.0e9,100))
+            skin_depth_transfer_func_inv = bode.invert_known_transfer_function(skin_depth_transfer_func)
+            new_amp = bode.apply_transfer_func(freq, amp, inv_list[0])
+            new_amp = bode.apply_transfer_func(freq, new_amp, skin_depth_transfer_func_inv)
+            new_amp = bode.apply_transfer_func(freq, new_amp, low_pass_filter)
+            new_v = bode.inv_fourier(freq, new_amp)
+            x_list.append(bode.genrange(1e-7,len(new_v)))
+            y_list.append(new_v)
             self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title, color_list)
     # returns r,l,c description for title
     def get_name_tag(self):
@@ -742,7 +774,7 @@ class MainMenu(Frame):
 
 if __name__ == '__main__':
     root = Tk()
-    root.geometry("460x160+300+300")
+    root.geometry("460x190+300+300")
     mainmenu = MainMenu(root)
     root.mainloop()
     mainmenu.save()

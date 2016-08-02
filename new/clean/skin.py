@@ -31,7 +31,7 @@ except ImportError:
 # ==============================================================================
 # ------------------------------------------------------------------------------
 # Skin Effect Single Transfer Functions
-# ------------------------------------------------------------------------------
+# ---------------   ---------------------------------------------------------------
 # the general function that returns a specific transfer function for given l,c
 def get_skin_transfer_func(folder_dict,rvals,l,c,Cdrpin,signal,drops,lenline,res,freq_domain):
     '''
@@ -45,11 +45,25 @@ def transpose(transfer_functions, rvals, freq_domain):
     overlays transfer functions of different r's to simulate skin effect
     '''
     skin_func = [freq_domain[1:],[],[]]
+    approx_rvals = []
+    for j in rvals:
+        approx_rvals.append(float('%2.1f'%j))
+    print 'NEW RVALS:', approx_rvals
     for i in range(1,len(freq_domain)):
         f= freq_domain[i]
         r = get_r(f)
-        r = num.find_closest(rvals, r)
-        func = transfer_functions[round(r,2)]
+        print "get_r",r
+        if r < 2:
+            try:
+                func = transfer_functions[float('%2.1f'%r)]
+            except KeyError:
+                func = transfer_functions[float('%2.1f'%r)+ 0.1]
+        else:
+            try:
+                func = transfer_functions[float('%2.1f'%r)]
+            except KeyError:
+                func = transfer_functions[float('%2.1f'%float('%2.0f'%r))]
+        print 'key accessed:',r
         skin_func[1].append(bode.get_val(func[0],func[1], f))
         skin_func[2].append(bode.get_val(func[0],func[2], f))
     return skin_func
@@ -61,9 +75,10 @@ def get_r_functions(folder_dict,rvals,l,c,Cdrpin,signal,drops,lenline,res):
     approximations = {}
     transfer_functions = {}
     for r in rvals:
-        approximations[round(r,2)] = folder_dict[vals_to_key(r,l,c,Cdrpin,signal,"ac",drops,lenline)]
+        approximations[float('%2.1f'%r)] = folder_dict[vals_to_key(r,l,c,Cdrpin,signal,"ac",drops,lenline)]
+        print str(folder_dict[vals_to_key(r,l,c,Cdrpin,signal,"ac",drops,lenline)]),'expanded to key','%2.1f'%r
     for r in rvals:
-        transfer_functions[round(r,2)] = bode.transfer_function(approximations[round(r,2)],res)
+        transfer_functions[float('%2.1f'%r)] = bode.transfer_function(approximations[float('%2.1f'%r)],res)
     return transfer_functions
 # given values, finds the key for folder_dict for the file with the given values
 def vals_to_key(rin,lin,cin,Cdrpin,signal,typein,drops,lenline):
