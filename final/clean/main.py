@@ -420,7 +420,6 @@ class MainMenu(Frame):
     #
     def convert_and_run(self,todo):
         '''
-        this takes todo and organizes all files for plotting in folder dict
         '''
         for key in todo:
             if key not in self.folder_dict.keys():
