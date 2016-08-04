@@ -656,9 +656,12 @@ class MainMenu(Frame):
         '''
         '''
         logic_string = ''
+        count = 0
         for char in self.bitvar.get():
-            if char in '01':
+            if (char in '01') and (count <= 6):
                 logic_string += char
+                count += 1
+        self.bitvar.set(logic_string)
         # logic_string += self.bitvar1.get()
         # logic_string += self.bitvar2.get()
         # logic_string += self.bitvar3.get()
