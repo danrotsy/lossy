@@ -62,22 +62,22 @@ class MainMenu(Frame):
         '''
 
         self.R_low1 = self.sciToFloat("0.02")
-        self.R_high1 = self.sciToFloat("2.00")
-        self.R_low2 = self.sciToFloat("3.00")
-        self.R_high2 = self.sciToFloat("20.0")
+        self.R_high1 = self.sciToFloat("1.02")
+        self.R_low2 = self.sciToFloat("2.00")
+        self.R_high2 = self.sciToFloat("21.0")
         # self.R_high = self.sciToFloat("1.8")
         self.R_step1 = self.sciToFloat("0.2")
         self.R_step2 = self.sciToFloat("1.00")
 
-        self.L_low = self.sciToFloat("0.079n")
-        self.L_high = self.sciToFloat("7.9n")
+        self.L_low = self.sciToFloat("0.5n")
+        self.L_high = self.sciToFloat("10.5n")
         # self.L_high = self.sciToFloat("7.11n")
-        self.L_step = self.sciToFloat("0.79n")
+        self.L_step = self.sciToFloat("0.5n")
 
-        self.C_low = self.sciToFloat("0.22p")
-        self.C_high = self.sciToFloat("22p")
+        self.C_low = self.sciToFloat("0.2p")
+        self.C_high = self.sciToFloat("10.7p")
         # self.C_high = self.sciToFloat("19.8p")
-        self.C_step = self.sciToFloat("2.2p")
+        self.C_step = self.sciToFloat("0.7p")
 
         #each key will be formatted as such: (r, l, c), Cdrp, signal, ac/trans
         #Ex. folder_dict[[(1.02, 1.659e-9, 2.42e-12), 1, "Vout", "trans"]] =
@@ -147,21 +147,21 @@ class MainMenu(Frame):
         self.rlabelvar.set('20mOhm/cm')
         self.rlabel = Label(self, textvariable=self.rlabelvar)
         self.rlabel.place(x=235,y=5)
-        self.rscale = Scale(self, from_=0.02, to_=2.00, length=185, command=self.update_rlabel) #0.2
+        self.rscale = Scale(self, from_=0.02, to_=1.00, length=185, command=self.update_rlabel) #0.2
         self.rscale.place(x=50,y=5)
 
         self.llabelvar = StringVar()
-        self.llabelvar.set('100pH/cm')
+        self.llabelvar.set('500pH/cm')
         self.llabel = Label(self, textvariable=self.llabelvar)
         self.llabel.place(x=235,y=35)
-        self.lscale = Scale(self, from_=0.079*(10**-9), to_=7.9*(10**-9), length=185, command=self.update_llabel) #0.79n
+        self.lscale = Scale(self, from_=0.5*(10**-9), to_=10*(10**-9), length=185, command=self.update_llabel) #0.79n
         self.lscale.place(x=50,y=35)
 
         self.clabelvar = StringVar()
         self.clabelvar.set('200fF/cm')
         self.clabel = Label(self, textvariable=self.clabelvar)
         self.clabel.place(x=235,y=65)
-        self.cscale = Scale(self, from_=0.22*(10**-12), to_=22*(10**-12), length=185, command=self.update_clabel) #2.2p
+        self.cscale = Scale(self, from_=0.2*(10**-12), to_=10*(10**-12), length=185, command=self.update_clabel) #2.2p
         self.cscale.place(x=50,y=65)
 
         self.vilockvar = BooleanVar()
