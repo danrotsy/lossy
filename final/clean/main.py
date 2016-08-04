@@ -624,16 +624,16 @@ class MainMenu(Frame):
         strnum = self.floatToSci(num)
         return self.sciToFloat(strnum)
     # takes values and returns a key for self.folder_dict
-    def vals_to_key(self,rin,lin,cin,Cdrpin,signal,typein, lenin, dropsin):
-        '''
-        rin         a float or string
-        lin         a float or string
-        cin         a float or string
-        Cdrpin      a float or string
-        signal      a string (Vin, Vn001, Vn014, Vn026, Vout)
-        typein      a string (ac or trans)
-        '''
-        return ('({r},{l},{c}),{cdrp},{sig},{tp},{len},{drops}').format(r=rin, l=lin, c=cin, cdrp=Cdrpin, sig=signal, tp=typein, len = lenin, drops = dropsin)
+#    def vals_to_key(self,rin,lin,cin,Cdrpin,signal,typein, lenin, dropsin):
+#        '''
+#        rin         a float or string
+#        lin         a float or string
+#        cin         a float or string
+#        Cdrpin      a float or string
+#        signal      a string (Vin, Vn001, Vn014, Vn026, Vout)
+#        typein      a string (ac or trans)
+#        '''
+#        return ('({r},{l},{c}),{cdrp},{sig},{tp},{len},{drops}').format(r=rin, l=lin, c=cin, cdrp=Cdrpin, sig=signal, tp=typein, len = lenin, drops = dropsin)
     # returns the element in list closest to val
     def findClosest(self,list,val):
         '''
@@ -657,56 +657,56 @@ class MainMenu(Frame):
 
     # returns a list of keys for every file in the folder, and a list of all the Rs, Ls and Cs
     def createFileDict(self):
-    	'''
-    	folder_name:the path of the folder to be scanned
+        '''
+        folder_name:the path of the folder to be scanned
 
-    	returns a list of keys for every file in the folder, and a list of all the Rs, Ls and Cs
-    	'''
-    	folder_dict = {}
-    	dict_key = [0, 0, 0, 0]
-    	dict_rlc_tuple = (0,0,0)
-    	###this changes the current directory to folder_name, so there wouldn't be directory to list named folder_name###
-    	###os.chdir(folder_name)###
-    	file_list = []
-    	var = []
-    	for a in [10, 14, 28]:
-    		for b in ["Bode", "Transient"]:
-    			path = "../data/transmission_line_{}_dropoffs/Multidrop{}".format(a, b)
-    			for f in os.listdir(path):
-    				if f[-3:] == "csv":
-    					var = []
-    					file_list.append(os.path.join(path, f))
-    					for d in f.split('=')[1:]:
-    						curr_index = 0
-    						for char in d:
-    							if char == "_":
-    								break
-    							curr_index += 1
-    						var.append( d[:curr_index] )
+        returns a list of keys for every file in the folder, and a list of all the Rs, Ls and Cs
+        '''
+        folder_dict = {}
+        dict_key = [0, 0, 0, 0]
+        dict_rlc_tuple = (0,0,0)
+        ###this changes the current directory to folder_name, so there wouldn't be directory to list named folder_name###
+        ###os.chdir(folder_name)###
+        file_list = []
+        var = []
+        for a in [10, 14, 28]:
+            for b in ["Bode", "Transient"]:
+                path = "../data/transmission_line_{}_dropoffs/Multidrop{}".format(a, b)
+                for f in os.listdir(path):
+                    if f[-3:] == "csv":
+                        var = []
+                        file_list.append(os.path.join(path, f))
+                        for d in f.split('=')[1:]:
+                            curr_index = 0
+                            for char in d:
+                                if char == "_":
+                                    break
+                                curr_index += 1
+                            var.append( d[:curr_index] )
 
-    					if f[0] == "t":
-    						analy = "tran"
-    					else:
-    						analy = "ac"
-    					if f[-19:-16] == "out":
-    						signal = "Vout"
-    					elif f[-19:-16] == "rst":
-    						signal = "Vfirst"
-    					elif f[-19:-16] == "ast":
-    						signal = "Vlast"
-    					elif f[-19:-16] == "dle":
-    						signal = "Vmiddle"
-    					else:
-    						signal = "Vin"
-						print f[-13:-4]
-						vin = ""
-						for char in f[-13:-4]:
-							if char in "01":
-								vin += char
-						print vin
-    					tuple = (var[0], var[1], var[2])
-    					tuple2 = (tuple, var[3], signal, analy, a, var[4], vin)
-    					folder_dict[tuple2] = file_list[-1]
+                        if f[0] == "t":
+                            analy = "tran"
+                        else:
+                            analy = "ac"
+                        if f[-7:-4] == "out":
+                            signal = "Vout"
+                        elif f[-7:-4] == "rst":
+                            signal = "Vfirst"
+                        elif f[-7:-4] == "ast":
+                            signal = "Vlast"
+                        elif f[-7:-4] == "dle":
+                            signal = "Vmiddle"
+                        else:
+                            signal = "Vin"
+                        print f[-13:-4]
+                        vin = ""
+                        for char in f[-13:-4]:
+                            if char in "01":
+                                vin += char
+                        print vin
+                        tuple = (var[3], var[4], var[5])
+                        tuple2 = (tuple, var[0], signal, analy, a, var[2], vin)
+                        folder_dict[tuple2] = file_list[-1]
         self.folder_dict = folder_dict
     # saves folder_dict, Rvals, Lvals, and Cvals in a pickle file
     def save(self):

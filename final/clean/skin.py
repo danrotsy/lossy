@@ -97,7 +97,7 @@ def get_r(frequency):
     '''
     finds the resistance due to skin effect at a given frequency
     '''
-    p = 1.7e-8
+    p = 1.68e-8
     d = get_depth(frequency)
     w = 100e-6
     h = 18e-6
@@ -110,7 +110,7 @@ def get_depth(frequency):
     '''
     p = 1.7e-8
     u = 4*math.pi*1e-7
-    return math.sqrt((2*p)/(frequency*u))
+    return math.sqrt((2*p)/(2*math.pi*frequency*u))
 # gets folder_dict, rvals, lvals, and cvals from main_save.p (from main.py)
 def get_main_save():
     '''
