@@ -444,7 +444,7 @@ class MainMenu(Frame):
                 print vin
                 cmd = 'Auto_LTSpice_Now.exe {} {} {} {} {} {} {} {} "{}"'.format(key[4], analysis, cdrp, lenline, key[0][0], key[0][1], key[0][2], key[2], vin[:-1])
                 os.system(cmd)
-                self.folder_dict[key] = '../data/{}/Multidrop{}/{}_Cdrp={}_Rterm=sqrt(Lline_Cline)_Lenline={}_Rline={}_Lline={}_Cline={}_Vin={}_{}.csv'.format(filename, path, analysiskey, cdrp,lenline,key[0][0], key[0][1],key[0][2],vin_[:-1],key[2]) #self.floatToSci(key[0][0]), self.floatToSci(key[0][1]), self.floatToSci(key[0][2]),cdrp, lenline, key[2])
+                self.folder_dict[key] = '..\data\{}\Multidrop{}\{}_Cdrp={}_Rterm=sqrt(Lline_Cline)_Lenline={}_Rline={}_Lline={}_Cline={}_Vin={}_{}.csv'.format(filename, path, analysiskey, cdrp,lenline,key[0][0], key[0][1],key[0][2],vin_[:-1],key[2]) #self.floatToSci(key[0][0]), self.floatToSci(key[0][1]), self.floatToSci(key[0][2]),cdrp, lenline, key[2])
                 print "COMMAND:", cmd
                 print "KEY:", key
                 print "FOLDER_DICT", self.folder_dict[key]

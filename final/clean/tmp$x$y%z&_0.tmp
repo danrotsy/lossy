@@ -1,7 +1,7 @@
 #Title: * C:\LTSpiceTransmissionLines\LTSpice\sim\main\tranmission_line.asc
-#Date: Thu Aug 04 09:31:08 2016
-#Plotname: AC Analysis
-#Variables(dp): frequency V(out) 
-#Ltsputil: -xo2dp
+#Date: Thu Aug 04 10:06:33 2016
+#Plotname: Transient Analysis
+#Variables(): time V(out) 
+#Ltsputil: -xo2
 #DataColumns: 2
 #InfoLines: 12
