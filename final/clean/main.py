@@ -662,17 +662,6 @@ class MainMenu(Frame):
         '''
         strnum = self.floatToSci(num)
         return self.sciToFloat(strnum)
-    # takes values and returns a key for self.folder_dict
-#    def vals_to_key(self,rin,lin,cin,Cdrpin,signal,typein, lenin, dropsin):
-#        '''
-#        rin         a float or string
-#        lin         a float or string
-#        cin         a float or string
-#        Cdrpin      a float or string
-#        signal      a string (Vin, Vn001, Vn014, Vn026, Vout)
-#        typein      a string (ac or trans)
-#        '''
-#        return ('({r},{l},{c}),{cdrp},{sig},{tp},{len},{drops}').format(r=rin, l=lin, c=cin, cdrp=Cdrpin, sig=signal, tp=typein, len = lenin, drops = dropsin)
     # returns the element in list closest to val
     def findClosest(self,list,val):
         '''
