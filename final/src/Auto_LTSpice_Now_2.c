@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 	 * arguments are given, exit immediately
 	 * or else argv[1] will be undefined
 	 *
-	 * ARGS: num_dropoffs, analysis, cdrp, lenline, r, l, c, signal, quoted bits with spaces
+	 * ARGS: num_dropoffs, analysis, cdrp, lenline, r, l, c, signal, quoted bits with spaces, bit time index
 	 */
 	if(argc < 10) {
 		printf("Not enough Command-line arguments supplied\n");
@@ -154,18 +154,15 @@ int main(int argc, char* argv[])
 	 * into the temporary netlist
 	 */
 	printf("Substitutuing input currents...\n");
-	for(int n=0; n < net.num_currents; n++) {
-		if(strcmp(net.vin_str[n], "1")==0)
-			strcpy(buffer_str, MAX_CURRENT);
-		else
-			strcpy(buffer_str, MIN_CURRENT);
+	for(int n=0; n < net.num_sources; n++) {
 		/*
 		printf("Currents[%d]: %s\n", n, net.vin_str[n]);
 		printf("Delay[%d]: %s\n", n, net.delay[n]);
 		*/
-		sprintf(buffer, "I%d %s %s PULSE(0 %s %s %s %s %s) AC %s\n", (n+1), net.in_label, net.in_ref_label, buffer_str, net.delay[n], net.v_rise, net.v_fall, net.v_on, net.ac_amplitude);
-		printf("Completed Current Buffer: %s", buffer);
-		fputs(buffer, tmp_netlist);
+		if(net.current_str[n] == NULL)
+			printf("String is null!\n");
+		printf("Current String: %s", net.current_str[n]);
+		fputs(net.current_str[n], tmp_netlist);
 	}
 	/* Next the transient and ac analysis spice directives
 	 * are inserted into the tmp.cir netlist
@@ -183,7 +180,7 @@ int main(int argc, char* argv[])
 	if(fseek(tmp_netlist, net.tran_pos, SEEK_SET))
 		perror("Error in seeking transient analysis line");
 	fputc(net.is_tran ? '.' : ';', tmp_netlist);
-	fseek(tmp_netlist, net.ac_pos, SEEK_SET);
+	fseek(tmp_netlist, net.tran_pos, SEEK_SET);
 	fgets(buffer, MAX_CHAR, tmp_netlist);
 	printf("Transient Analysis: %s", buffer);
 	
@@ -269,10 +266,10 @@ int main(int argc, char* argv[])
 		sprintf(filename_buffer, "_%s=%s", net.param_name[n], net.param_strvalue[n]);
 		strcat(filename_buffer2, filename_buffer);
 	}
-	sprintf(filename_buffer, "_Vin=%s", net.vin_str[0]);
+	sprintf(filename_buffer, "_Vin=%d", net.vin[0]);
 	strcat(filename_buffer2, filename_buffer);
 	for(int n=1; n < net.num_currents; n++) {
-		sprintf(filename_buffer, "_%s", net.vin_str[n]);
+		sprintf(filename_buffer, "_%d", net.vin[n]);
 		strcat(filename_buffer2, filename_buffer);
 	}
 	strcat(filename_buffer2, ".raw");

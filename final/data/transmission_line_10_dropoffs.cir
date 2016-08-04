@@ -34,15 +34,17 @@ O27 InPulse InRefPulse N001 N011 LossyTL
 R16 InPulse InRefPulse {Rterm}
 R17 InRefPulse 0 100k
 R2 Out OutRef {Rterm}
-I1 InPulse InRefPulse PULSE(0 -10m 0.0 2n 2n 16n) AC 1
-I2 InPulse InRefPulse PULSE(0 0 20.0n 2n 2n 16n) AC 1
-I3 InPulse InRefPulse PULSE(0 -10m 40.0n 2n 2n 16n) AC 1
-I4 InPulse InRefPulse PULSE(0 0 60.0n 2n 2n 16n) AC 1
-I5 InPulse InRefPulse PULSE(0 -10m 80.0n 2n 2n 16n) AC 1
-.tran 0 100n
+I1 InPulse InRefPulse PULSE(0 -5m 0.0 0 200p 4.3n) AC 1
+I2 InPulse InRefPulse PULSE(0 0 4.5n 200p 200p 1.1n) AC 1
+I3 InPulse InRefPulse PULSE(0 -5m 6.0n 200p 200p 2.6n) AC 1
+I4 InPulse InRefPulse PULSE(0 0 9.0n 200p 200p 1.1n) AC 1
+I5 InPulse InRefPulse PULSE(0 -5m 10.5n 200p 200p 1.1n) AC 1
+I6 InPulse InRefPulse PULSE(0 0 12.0n 200p 200p 1.1n) AC 1
+I7 InPulse InRefPulse PULSE(0 -5m 13.5n 200p 0 1.3n) AC 1
+.tran 0 15.0n
 ;ac oct 50 10k 1000Meg
-.param Cdrp=3.0p Rterm=sqrt(Lline/Cline) Lenline=5.0 Rline=20.0m Lline=500.0p Cline=200.0f
-.save V(Out) V(N001) V(N011) V(N010) V(N020) V(N006) V(N016) V(InPulse)
+.param Cdrp=500.0f Rterm=sqrt(Lline/Cline) Lenline=1.0 Rline=2.0m Lline=79.0p Cline=22.0f
+.save V(Out) V(N001) V(N010) V(N006) V(InPulse)
 .model LossyTL  LTRA(len=Lenline R=Rline L=Lline C=Cline)
 .backanno
 .end

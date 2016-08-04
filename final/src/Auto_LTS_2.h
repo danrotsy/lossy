@@ -39,15 +39,14 @@ char MAX_CURRENT[] = "-5m";
 char MIN_CURRENT[] = "0";
 char IN_PULSE[] = "InPulse";
 char IN_REF_PULSE[] = "InRefPulse";
-char RISE[] = "100p";
-char FALL[] = "100p";
-char ON[] = "1.3n";
+char RISE_FALL[] = "200p";
+char *DELTA_DELAY[] = {"1n", "2n", "3n", "4n", "5n", "6n", "7n", "8n", "9n", "10n", "1.5n"};
 
 struct netlist
 {
 	char **param_name;
 	char **param_strvalue;
-	char **vin_str;
+	int *vin;
 	char **save_str;
 	
 	float *param_fvalue;
@@ -65,9 +64,13 @@ struct netlist
 	char v_on[MAX_CHAR];
 	char ac_amplitude[MAX_CHAR];
 	float delta_delay;
-	char **delay;
+	//char **delay;
+	char **current_str;
 	
 	int is_tran;
+	
+	int num_sources;
+	int sources_size;
 
 	int save_size;
 	int num_save;
@@ -112,39 +115,135 @@ int initialize_netlist(struct netlist *net, int argc, char **argv)
 	int max_size = 5;
 	char *p_tok;
 	p_tok = strtok(argv[9], " ");
-	net->vin_str = malloc(max_size*sizeof(char*));
+	net->vin = malloc(max_size*sizeof(char*));
 	while(p_tok != NULL) {
 		if(curr_index >= max_size) {
 			max_size += 3;
-			net->vin_str = realloc(net->vin_str, max_size*sizeof(char*));
+			net->vin = realloc(net->vin, max_size*sizeof(char*));
 		}
-		net->vin_str[curr_index] = malloc(MAX_CHAR*sizeof(char));
-		strcpy(net->vin_str[curr_index], p_tok);
+		//net->vin_str[curr_index] = malloc(MAX_CHAR*sizeof(char));
+		net->vin[curr_index] = atoi(p_tok);
+		//strcpy(net->vin_str[curr_index], p_tok);
 		curr_index++;
 		p_tok = strtok(NULL, " ");
 	}
 	net->num_currents = curr_index;
-	for(int n=curr_index; n < max_size; n++) 
-		free(net->vin_str[n]);
-	net->vin_str = realloc(net->vin_str, net->num_currents*sizeof(char*));
-	net->delta_delay = 20e-9;
-	net->delay = malloc(net->num_currents*sizeof(char*));
+	net->vin = realloc(net->vin, net->num_currents*sizeof(char*));
+	//net->delay = malloc(net->num_currents*sizeof(char*));
+	net->current_str = malloc(net->num_currents*sizeof(char*));
 	printf("Determining the delay between pulses...\n");
-	float delay_tmp = 0;
-	for(int n=0; n < net->num_currents; n++) {
-		net->delay[n] = malloc(MAX_CHAR*sizeof(char));
-		expo_to_str(net->delay[n], delay_tmp);
-		printf("Delay[%d] = %s\n", n, net->delay[n]);
-		delay_tmp += net->delta_delay;
-	}
+	
+	char delay_str[MAX_CHAR];
+	float delta_delay = str_to_expo(DELTA_DELAY[atoi(argv[10])]);
+	float rise_fall = str_to_expo(RISE_FALL);
+	char buffer_str[MAX_CHAR];
 
-	strcpy(net->in_label, IN_PULSE);
-	strcpy(net->in_ref_label, IN_REF_PULSE);
-	strcpy(net->v_rise, RISE);
-	strcpy(net->v_fall, FALL);
-	strcpy(net->v_on, ON);
 	strcpy(net->ac_amplitude, "1");
 	
+	float on = delta_delay;
+	char on_str[MAX_CHAR];
+	float delay = 0;
+	net->sources_size = 5;
+	net->num_sources = 0;
+	net->current_str = malloc(net->sources_size*sizeof(char*));
+	for(int n=0; n < net->sources_size; n++)
+		net->current_str[n] = malloc(MAX_CHAR*sizeof(char));
+	
+	net->num_sources = 0;
+	for(int n=0; n < net->num_currents; n++) {
+		if(net->num_sources >= net->sources_size) {
+			net->sources_size += 3;
+			net->current_str = realloc(net->current_str, net->sources_size*sizeof(char*));
+			for(int n=net->num_sources; n < net->sources_size; n++)
+				net->current_str[n] = malloc(MAX_CHAR*sizeof(char));
+		}
+		
+		if(n == (net->num_currents-1)) {
+			if(net->vin[n] == 1)
+				strcpy(buffer_str, MAX_CURRENT);
+			else
+				strcpy(buffer_str, MIN_CURRENT);
+			expo_to_str(delay_str, delay);
+			expo_to_str(on_str, on - rise_fall);
+			printf("I%d %s %s PULSE(0 %s %s %s %s %s) AC %s\n", (net->num_sources+1), IN_PULSE, IN_REF_PULSE, 
+					buffer_str, delay_str, RISE_FALL, "0", on_str, net->ac_amplitude);
+			sprintf(net->current_str[net->num_sources], "I%d %s %s PULSE(0 %s %s %s %s %s) AC %s\n", (net->num_sources+1), IN_PULSE, IN_REF_PULSE, 
+					buffer_str, delay_str, RISE_FALL, "0", on_str, net->ac_amplitude);
+			delay += on;
+			net->num_sources++;
+		}
+		else if(net->num_sources == 0 && net->vin[n] != net->vin[n+1]) {
+			if(net->vin[n] == 1)
+				strcpy(buffer_str, MAX_CURRENT);
+			else
+				strcpy(buffer_str, MIN_CURRENT);
+			expo_to_str(delay_str, delay);
+			expo_to_str(on_str, on - rise_fall);
+			printf("I%d %s %s PULSE(0 %s %s %s %s %s) AC %s\n", (net->num_sources+1), IN_PULSE, IN_REF_PULSE, 
+					buffer_str, delay_str, "0", RISE_FALL, on_str, net->ac_amplitude);
+			sprintf(net->current_str[net->num_sources], "I%d %s %s PULSE(0 %s %s %s %s %s) AC %s\n", (net->num_sources+1), IN_PULSE, IN_REF_PULSE, 
+					buffer_str, delay_str, "0", RISE_FALL, on_str, net->ac_amplitude);
+			delay += on;
+			on = delta_delay;
+			net->num_sources++;
+		}
+		else if(net->vin[n] != net->vin[n+1]) {
+			if(net->vin[n] == 1)
+				strcpy(buffer_str, MAX_CURRENT);
+			else
+				strcpy(buffer_str, MIN_CURRENT);
+			expo_to_str(delay_str, delay);
+			expo_to_str(on_str, on - 2*rise_fall);
+			printf("I%d %s %s PULSE(0 %s %s %s %s %s) AC %s\n", (net->num_sources+1), IN_PULSE, IN_REF_PULSE, 
+					buffer_str, delay_str, RISE_FALL, RISE_FALL, on_str, net->ac_amplitude);
+			sprintf(net->current_str[net->num_sources], "I%d %s %s PULSE(0 %s %s %s %s %s) AC %s\n", (net->num_sources+1), IN_PULSE, IN_REF_PULSE, 
+					buffer_str, delay_str, RISE_FALL, RISE_FALL, on_str, net->ac_amplitude);
+			delay += on;
+			on = delta_delay;
+			net->num_sources++;
+		}
+		else {
+			on += delta_delay;
+		}
+	}
+	for(int n=net->num_sources; n < net->sources_size; n++)
+		free(net->current_str[n]);
+	
+	printf("Number of sources: %d\n", net->num_sources);
+	net->current_str = realloc(net->current_str, net->num_sources*sizeof(char*));
+/*
+	for(int n=0; n < net->num_currents; n++) {
+		//net->delay[n] = malloc(MAX_CHAR*sizeof(char));
+		net->current_str[n] = malloc(MAX_CHAR*sizeof(char));
+		expo_to_str(delay_tmp_str, delay_tmp);
+		//printf("Delay[%d] = %s\n", n, net->delay[n]);
+		if(n != 0 && n != (net->num_currents-1)) {
+			if(net->vin[n] == net->vin[n-1] && net->vin[n] == net->vin[n+1])
+				sprintf(net->current_str[n], "I%d %s %s PULSE(0 %s %s %s %s %s) AC %s\n", (n+1), IN_PULSE, IN_REF_PULSE, 
+					buffer_str, delay_tmp_str, "0", "0", DELTA_DELAY[atoi(argv[10])]);
+			else if(net->vin[n] != net->vin[n-1] && net->vin[n] == net->vin[n+1])
+				sprintf(net->current_str[n], "I%d %s %s PULSE(0 %s %s %s %s %s) AC %s\n", (n+1), IN_PULSE, IN_REF_PULSE, 
+					buffer_str, delay_tmp_str, net->v_rise, "0", on1);
+			else if(net->vin[n] == net->vin[n-1] && net->vin[n] != net->vin[n+1])
+				sprintf(net->current_str[n], "I%d %s %s PULSE(0 %s %s %s %s %s) AC %s\n", (n+1), IN_PULSE, IN_REF_PULSE, 
+					buffer_str, delay_tmp_str, "0", RISE_FALL, on1);
+			else
+				sprintf(net->current_str[n], "I%d %s %s PULSE(0 %s %s %s %s %s) AC %s\n", (n+1), IN_PULSE, IN_REF_PULSE, 
+					buffer_str, delay_tmp_str, RISE_FALL, RISE_FALL, on2);
+		}
+		else if(n == (net->num_currents-1))
+			if(net->vin[n] == net->vin[n-1])
+				sprintf(net->current_str[n], "I%d %s %s PULSE(0 %s %s %s %s %s) AC %s\n", (n+1), IN_PULSE, IN_REF_PULSE, 
+					buffer_str, delay_tmp_str, "0", "0", DELTA_DELAY[atoi(argv[10])], net->ac_amplitude);
+			else
+				sprintf(net->current_str[n], "I%d %s %s PULSE(0 %s %s %s %s %s) AC %s\n", (n+1), IN_PULSE, IN_REF_PULSE, 
+					buffer_str, delay_tmp_str, RISE_FALL, "0", on1, net->ac_amplitude);
+		else
+			sprintf(net->current_str[n], "I%d %s %s PULSE(0 %s %s %s %s %s) AC %s\n", (n+1), IN_PULSE, IN_REF_PULSE, 
+								buffer_str, delay_tmp_str, "0", "0", DELTA_DELAY[atoi(argv[10])], net->ac_amplitude);
+		delay_tmp += delta_delay;
+	}
+*/
 	net->is_tran = 0;
 	if((strcmp(argv[2], "tran")==0) || (strcmp(argv[2], "TRAN")==0))
 		net->is_tran = 1;
@@ -154,6 +253,11 @@ int initialize_netlist(struct netlist *net, int argc, char **argv)
 	net->save_str = malloc(net->save_size*sizeof(char*));
 	for(int n=0; n < net->save_size; n++)
 		net->save_str[n] = malloc(MAX_CHAR*sizeof(char));
+	
+	char tran_time[MAX_CHAR];
+	expo_to_str(tran_time, delay);
+	printf("Delay tmp: %e to %s\n", delay, tran_time);
+	sprintf(net->tran_str, ".tran 0 %s\n", tran_time);
 	
 	return 0;
 }
@@ -392,11 +496,13 @@ int prepare_netlist(struct netlist *net, FILE* tl_netlist)
 			printf("P_ch: %s\n", p_ch);
 		}
 		*/
+		/*
 		if(strcmp(buffer+1, "tran")==0) {
-			/* printf("Found tran spice directive\n"); */
+			* printf("Found tran spice directive\n"); *
 			buffer[5] = ' ';
 			strcpy(net->tran_str, buffer);
-		} else if(strcmp(buffer+1, "ac")==0) {
+		*/
+		if(strcmp(buffer+1, "ac")==0) {
 			/* printf("Found ac spice directive\n"); */
 			buffer[3] = ' ';
 			strcpy(net->ac_str, buffer);
