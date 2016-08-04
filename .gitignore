@@ -1,13 +1,11 @@
 new
 old
-final/data
 final/src
 final/clean/main_save.p
 final/clean/tmp$x$y%z&_0.tmp
 final/clean/tmp$x$y%z&_1.tmp
 final/clean/tmp$x$y%z&_3.tmp
 final/clean/tmp$x$y%z&_4.tmp
-final/data/transmission_line_10_dropoffs.cir
 final/data/transmission_line_10_dropoffs.log
 final/data/transmission_line_10_dropoffs.op.raw
 final/lossy.lnk
