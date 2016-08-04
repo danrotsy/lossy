@@ -124,12 +124,27 @@ class MainMenu(Frame):
         plotButton = Button(self, text="Plot", command=self.gui_to_plots, width= 20)
         plotButton.place(x=5, y=155)
 
-        self.widthlabel = Label(self, text='Thickness')
-        self.widthlabel.place(x=5, y=128)
+        self.widthlabel = Label(self, text='Width')
+        self.widthlabel.place(x=225, y=98)
         self.widthvar = StringVar(self)
-        self.widthvar.set('18um')
-        self.widthlibrary = OptionMenu(self, self.widthvar, '', '9um', '18um', '27um', '36um', '45um', '54um', '63um', '72um', '81um', '90um', '99um')
-        self.widthlibrary.place(x=70, y=125)
+        self.widthvar.set('100um')
+        self.widthlibrary = OptionMenu(self, self.widthvar, '', '50um', '100um', '150um', '200um', '250um', '300um')
+        self.widthlibrary.place(x=260, y=95)
+        # self.reslibrary.place(x=405,y=95) 65 '', '50um', '100um', '150um', '200um', '250um', '300um'
+
+        self.thicknesslabel = Label(self, text='Thickness')
+        self.thicknesslabel.place(x=330, y=98)
+        self.thicknessvar = StringVar(self)
+        self.thicknessvar.set('18um')
+        self.thicknesslibrary = OptionMenu(self, self.thicknessvar, '', '9um', '18um', '27um', '36um', '45um', '54um', '63um', '72um', '81um', '90um', '99um')
+        self.thicknesslibrary.place(x=385, y=95)
+
+        self.bittimelabel = Label(self, text='Bit')
+        self.bittimelabel.place(x=145,y=98)
+        self.bittimevar = StringVar(self)
+        self.bittimevar.set('10ns')
+        self.bittimelibrary = OptionMenu(self,self.bittimevar, '', '1ns', '2ns', '3ns', '4ns', '5ns', '6ns', '7ns', '8ns', '9ns', '10ns')
+        self.bittimelibrary.place(x=165,y=95)
 
         self.rlockvar = BooleanVar()
         rlock = Checkbutton(self, text="R", variable=self.rlockvar)
@@ -211,7 +226,7 @@ class MainMenu(Frame):
 
         self.bitvar = StringVar(self)
         self.bitvar.set('10101')
-        self.bitentry = Entry(self, textvariable=self.bitvar)
+        self.bitentry = Entry(self, textvariable=self.bitvar, width=14)
         self.bitentry.place(x=45,y=95)
 
         # self.bitvar1 = StringVar(self)
@@ -245,11 +260,12 @@ class MainMenu(Frame):
         self.libary.place(x=145,y=125)
 
         self.reslabel = Label(self, text='Transform Res.')
-        self.reslabel.place(x=320,y=98)
+        self.reslabel.place(x=5,y=128)
         self.resvar = StringVar(self)
         self.resvar.set('64')
         self.reslibrary = OptionMenu(self, self.resvar, '', '64', '128', '256', '512', '1024', '2048', '4096')
-        self.reslibrary.place(x=405,y=95)
+        self.reslibrary.place(x=90,y=125)
+        # self.widthlibrary.place(x=70, y=125) 85
 
         self.loadvar = StringVar(self)
         self.loadvar.set('10 Loads')
@@ -470,9 +486,24 @@ class MainMenu(Frame):
             color+=color_step
         self.new_figure(title, instructions, x_axis_title, y_axis_title)
     #
+    def get_bit_index(self):
+        '''
+        '''
+        bit = int(self.bittimevar.get()[:-2])
+        bit -= 1
+        return bit
+    #
     def get_thickness(self):
-        thickness_sci = self.widthvar.get()[:-1]
+        '''
+        '''
+        thickness_sci = self.thickness_scivar.get()[:-1]
         return self.sciToFloat(thickness_sci)
+    #
+    def get_width(self):
+        '''
+        '''
+        width_sci = self.widthvar.get()[:-1]
+        return self.sciToFloat(width_sci)
     # plots transient or bode plots after transforms are applied
     def plot_complex(self, todo, title, x_axis_title, y_axis_title):
         '''
@@ -524,7 +555,7 @@ class MainMenu(Frame):
             t,v,amp,freq = t_list[0],v_list[0],amp_list[0],freq_list[0]
             color_list.append((color,0,1-color))
             color += color_step
-            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], todo[0][6], res, bode.genrange(1.0e9,100),self.get_thickness())
+            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], todo[0][6], res, bode.genrange(1.0e9,100),self.get_width(),self.get_thickness())
             new_amp = bode.apply_transfer_func(freq, amp, inv_list[0])
             new_amp = bode.apply_transfer_func(freq, new_amp, skin_depth_transfer_func)
             new_v = bode.inv_fourier(freq, new_amp)
@@ -533,7 +564,7 @@ class MainMenu(Frame):
             self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title, color_list)
         if (self.var.get() == 'Skin Depth Bode'):
             color_list.append((color,0,1-color))
-            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], todo[0][6], res, bode.genrange(1.0e9,100),self.get_thickness())
+            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], todo[0][6], res, bode.genrange(1.0e9,100),self.get_width(),self.get_thickness())
             skin_depth_transfer_func = bode.to_dB(skin_depth_transfer_func)
             x_list.append(skin_depth_transfer_func[0])
             y_list.append(skin_depth_transfer_func[1])
@@ -542,7 +573,7 @@ class MainMenu(Frame):
             t,v,amp,freq = t_list[0],v_list[0],amp_list[0],freq_list[0]
             color_list.append((color,0,1-color))
             color += color_step
-            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], todo[0][6], res, bode.genrange(1.0e9,100),self.get_thickness())
+            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], todo[0][6], res, bode.genrange(1.0e9,100),self.get_width(),self.get_thickness())
             skin_depth_transfer_func_inv = bode.invert_known_transfer_function(skin_depth_transfer_func)
             new_amp = bode.apply_transfer_func(freq, amp, inv_list[0])
             new_amp = bode.apply_transfer_func(freq, new_amp, skin_depth_transfer_func_inv)
@@ -631,17 +662,6 @@ class MainMenu(Frame):
         '''
         strnum = self.floatToSci(num)
         return self.sciToFloat(strnum)
-    # takes values and returns a key for self.folder_dict
-#    def vals_to_key(self,rin,lin,cin,Cdrpin,signal,typein, lenin, dropsin):
-#        '''
-#        rin         a float or string
-#        lin         a float or string
-#        cin         a float or string
-#        Cdrpin      a float or string
-#        signal      a string (Vin, Vn001, Vn014, Vn026, Vout)
-#        typein      a string (ac or trans)
-#        '''
-#        return ('({r},{l},{c}),{cdrp},{sig},{tp},{len},{drops}').format(r=rin, l=lin, c=cin, cdrp=Cdrpin, sig=signal, tp=typein, len = lenin, drops = dropsin)
     # returns the element in list closest to val
     def findClosest(self,list,val):
         '''
@@ -656,9 +676,12 @@ class MainMenu(Frame):
         '''
         '''
         logic_string = ''
+        count = 0
         for char in self.bitvar.get():
-            if char in '01':
+            if (char in '01') and (count <= 6):
                 logic_string += char
+                count += 1
+        self.bitvar.set(logic_string)
         # logic_string += self.bitvar1.get()
         # logic_string += self.bitvar2.get()
         # logic_string += self.bitvar3.get()
