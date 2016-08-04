@@ -486,9 +486,24 @@ class MainMenu(Frame):
             color+=color_step
         self.new_figure(title, instructions, x_axis_title, y_axis_title)
     #
+    def get_bit_index(self):
+        '''
+        '''
+        bit = int(self.bittimevar.get()[:-2])
+        bit -= 1
+        return bit
+    #
     def get_thickness(self):
-        thickness_sci = self.widthvar.get()[:-1]
+        '''
+        '''
+        thickness_sci = self.thickness_scivar.get()[:-1]
         return self.sciToFloat(thickness_sci)
+    #
+    def get_width(self):
+        '''
+        '''
+        width_sci = self.widthvar.get()[:-1]
+        return self.sciToFloat(width_sci)
     # plots transient or bode plots after transforms are applied
     def plot_complex(self, todo, title, x_axis_title, y_axis_title):
         '''
@@ -540,7 +555,7 @@ class MainMenu(Frame):
             t,v,amp,freq = t_list[0],v_list[0],amp_list[0],freq_list[0]
             color_list.append((color,0,1-color))
             color += color_step
-            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], todo[0][6], res, bode.genrange(1.0e9,100),self.get_thickness())
+            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], todo[0][6], res, bode.genrange(1.0e9,100),self.get_width(),self.get_thickness())
             new_amp = bode.apply_transfer_func(freq, amp, inv_list[0])
             new_amp = bode.apply_transfer_func(freq, new_amp, skin_depth_transfer_func)
             new_v = bode.inv_fourier(freq, new_amp)
@@ -549,7 +564,7 @@ class MainMenu(Frame):
             self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title, color_list)
         if (self.var.get() == 'Skin Depth Bode'):
             color_list.append((color,0,1-color))
-            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], todo[0][6], res, bode.genrange(1.0e9,100),self.get_thickness())
+            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], todo[0][6], res, bode.genrange(1.0e9,100),self.get_width(),self.get_thickness())
             skin_depth_transfer_func = bode.to_dB(skin_depth_transfer_func)
             x_list.append(skin_depth_transfer_func[0])
             y_list.append(skin_depth_transfer_func[1])
@@ -558,7 +573,7 @@ class MainMenu(Frame):
             t,v,amp,freq = t_list[0],v_list[0],amp_list[0],freq_list[0]
             color_list.append((color,0,1-color))
             color += color_step
-            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], todo[0][6], res, bode.genrange(1.0e9,100),self.get_thickness())
+            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], todo[0][6], res, bode.genrange(1.0e9,100),self.get_width(),self.get_thickness())
             skin_depth_transfer_func_inv = bode.invert_known_transfer_function(skin_depth_transfer_func)
             new_amp = bode.apply_transfer_func(freq, amp, inv_list[0])
             new_amp = bode.apply_transfer_func(freq, new_amp, skin_depth_transfer_func_inv)

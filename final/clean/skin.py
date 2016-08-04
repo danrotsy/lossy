@@ -33,14 +33,14 @@ except ImportError:
 # Skin Effect Single Transfer Functions
 # ---------------   ---------------------------------------------------------------
 # the general function that returns a specific transfer function for given l,c
-def get_skin_transfer_func(folder_dict,rvals,l,c,Cdrpin,signal,drops,lenline,pulse,res,freq_domain,thickness):
+def get_skin_transfer_func(folder_dict,rvals,l,c,Cdrpin,signal,drops,lenline,pulse,res,freq_domain,width,thickness):
     '''
     the general function that returns a specific transfer function for given l,c
     '''
     transfer_functions = get_r_functions(folder_dict,rvals,l,c,Cdrpin,signal,drops,lenline,pulse,res)
     return transpose(transfer_functions, rvals, freq_domain,thickness)
 # overlays transfer functions of different r's to simulate skin effect
-def transpose(transfer_functions, rvals, freq_domain,thickness):
+def transpose(transfer_functions, rvals, freq_domain,width,thickness):
     '''
     overlays transfer functions of different r's to simulate skin effect
     '''
@@ -51,7 +51,7 @@ def transpose(transfer_functions, rvals, freq_domain,thickness):
     print 'NEW RVALS:', approx_rvals
     for i in range(1,len(freq_domain)):
         f= freq_domain[i]
-        r = get_r(f,thickness)
+        r = get_r(f,width,thickness)
         print "get_r",r
         if r < 2:
             try:
@@ -98,13 +98,13 @@ def vals_to_key(rin,lin,cin,Cdrpin,signal,typein,drops,lenline,pulse):
     r_tuple = (floatToSci(rin),lin,cin)
     return (r_tuple,Cdrpin,signal,typein,drops,lenline,pulse)
 # finds the resistance due to skin effect at a given frequency
-def get_r(frequency,thickness):
+def get_r(frequency,width,thickness):
     '''
     finds the resistance due to skin effect at a given frequency
     '''
     p = 1.68e-8
     d = get_depth(frequency)
-    w = 100e-6
+    w = width
     h = thickness
     print 'Frequency',frequency, "r", p/((2*w*d)+(2*h*d)-(4*d*d))
     return p/((2*w*d)+(2*h*d)-(4*d*d))
