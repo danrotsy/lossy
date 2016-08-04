@@ -124,12 +124,27 @@ class MainMenu(Frame):
         plotButton = Button(self, text="Plot", command=self.gui_to_plots, width= 20)
         plotButton.place(x=5, y=155)
 
-        self.widthlabel = Label(self, text='Thickness')
-        self.widthlabel.place(x=5, y=128)
+        self.widthlabel = Label(self, text='Width')
+        self.widthlabel.place(x=225, y=98)
         self.widthvar = StringVar(self)
-        self.widthvar.set('18um')
-        self.widthlibrary = OptionMenu(self, self.widthvar, '', '9um', '18um', '27um', '36um', '45um', '54um', '63um', '72um', '81um', '90um', '99um')
-        self.widthlibrary.place(x=70, y=125)
+        self.widthvar.set('100um')
+        self.widthlibrary = OptionMenu(self, self.widthvar, '', '50um', '100um', '150um', '200um', '250um', '300um')
+        self.widthlibrary.place(x=260, y=95)
+        # self.reslibrary.place(x=405,y=95) 65 '', '50um', '100um', '150um', '200um', '250um', '300um'
+
+        self.thicknesslabel = Label(self, text='Thickness')
+        self.thicknesslabel.place(x=330, y=98)
+        self.thicknessvar = StringVar(self)
+        self.thicknessvar.set('18um')
+        self.thicknesslibrary = OptionMenu(self, self.thicknessvar, '', '9um', '18um', '27um', '36um', '45um', '54um', '63um', '72um', '81um', '90um', '99um')
+        self.thicknesslibrary.place(x=385, y=95)
+
+        self.bittimelabel = Label(self, text='Bit')
+        self.bittimelabel.place(x=145,y=98)
+        self.bittimevar = StringVar(self)
+        self.bittimevar.set('10ns')
+        self.bittimelibrary = OptionMenu(self,self.bittimevar, '', '1ns', '2ns', '3ns', '4ns', '5ns', '6ns', '7ns', '8ns', '9ns', '10ns')
+        self.bittimelibrary.place(x=165,y=95)
 
         self.rlockvar = BooleanVar()
         rlock = Checkbutton(self, text="R", variable=self.rlockvar)
@@ -211,7 +226,7 @@ class MainMenu(Frame):
 
         self.bitvar = StringVar(self)
         self.bitvar.set('10101')
-        self.bitentry = Entry(self, textvariable=self.bitvar)
+        self.bitentry = Entry(self, textvariable=self.bitvar, width=14)
         self.bitentry.place(x=45,y=95)
 
         # self.bitvar1 = StringVar(self)
@@ -245,11 +260,12 @@ class MainMenu(Frame):
         self.libary.place(x=145,y=125)
 
         self.reslabel = Label(self, text='Transform Res.')
-        self.reslabel.place(x=320,y=98)
+        self.reslabel.place(x=5,y=128)
         self.resvar = StringVar(self)
         self.resvar.set('64')
         self.reslibrary = OptionMenu(self, self.resvar, '', '64', '128', '256', '512', '1024', '2048', '4096')
-        self.reslibrary.place(x=405,y=95)
+        self.reslibrary.place(x=90,y=125)
+        # self.widthlibrary.place(x=70, y=125) 85
 
         self.loadvar = StringVar(self)
         self.loadvar.set('10 Loads')
