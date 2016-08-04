@@ -332,13 +332,13 @@ class MainMenu(Frame):
             signal = 'Vin'
             changed += 1
         if self.dilockvar.get():
-            signal = 'Vf'
+            signal = 'Vfirst'
             changed += 1
         if self.dmlockvar.get():
-            signal = 'Vm'
+            signal = 'Vmiddle'
             changed += 1
         if self.dflockvar.get():
-            signal = 'Vd'
+            signal = 'Vlast'
             changed += 1
         if self.volockvar.get():
             signal = 'Vout'
