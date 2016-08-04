@@ -209,30 +209,35 @@ class MainMenu(Frame):
         self.logiclabel = Label(self, text='Logic')
         self.logiclabel.place(x=5,y=98)
 
-        self.bitvar1 = StringVar(self)
-        self.bitvar1.set('0')
-        self.bitlibrary1 = OptionMenu(self, self.bitvar1, '', '0', '1')
-        self.bitlibrary1.place(x=45,y=95)
+        self.bitvar = StringVar(self)
+        self.bitvar.set('10101')
+        self.bitentry = Entry(self, textvariable=self.bitvar)
+        self.bitentry.place(x=45,y=95)
 
-        self.bitvar2 = StringVar(self)
-        self.bitvar2.set('0')
-        self.bitlibrary2 = OptionMenu(self, self.bitvar2, '', '0', '1')
-        self.bitlibrary2.place(x=95,y=95)
-
-        self.bitvar3 = StringVar(self)
-        self.bitvar3.set('0')
-        self.bitlibrary3 = OptionMenu(self, self.bitvar3, '', '0', '1')
-        self.bitlibrary3.place(x=145,y=95)
-
-        self.bitvar4 = StringVar(self)
-        self.bitvar4.set('0')
-        self.bitlibrary4 = OptionMenu(self, self.bitvar4, '', '0', '1')
-        self.bitlibrary4.place(x=195,y=95)
-
-        self.bitvar5 = StringVar(self)
-        self.bitvar5.set('0')
-        self.bitlibrary5 = OptionMenu(self, self.bitvar5, '', '0', '1')
-        self.bitlibrary5.place(x=245,y=95)
+        # self.bitvar1 = StringVar(self)
+        # self.bitvar1.set('0')
+        # self.bitlibrary1 = OptionMenu(self, self.bitvar1, '', '0', '1')
+        # self.bitlibrary1.place(x=45,y=95)
+        #
+        # self.bitvar2 = StringVar(self)
+        # self.bitvar2.set('0')
+        # self.bitlibrary2 = OptionMenu(self, self.bitvar2, '', '0', '1')
+        # self.bitlibrary2.place(x=95,y=95)
+        #
+        # self.bitvar3 = StringVar(self)
+        # self.bitvar3.set('0')
+        # self.bitlibrary3 = OptionMenu(self, self.bitvar3, '', '0', '1')
+        # self.bitlibrary3.place(x=145,y=95)
+        #
+        # self.bitvar4 = StringVar(self)
+        # self.bitvar4.set('0')
+        # self.bitlibrary4 = OptionMenu(self, self.bitvar4, '', '0', '1')
+        # self.bitlibrary4.place(x=195,y=95)
+        #
+        # self.bitvar5 = StringVar(self)
+        # self.bitvar5.set('0')
+        # self.bitlibrary5 = OptionMenu(self, self.bitvar5, '', '0', '1')
+        # self.bitlibrary5.place(x=245,y=95)
 
         self.var = StringVar(self)
         self.var.set('Transient')
@@ -651,11 +656,14 @@ class MainMenu(Frame):
         '''
         '''
         logic_string = ''
-        logic_string += self.bitvar1.get()
-        logic_string += self.bitvar2.get()
-        logic_string += self.bitvar3.get()
-        logic_string += self.bitvar4.get()
-        logic_string += self.bitvar5.get()
+        for char in self.bitvar.get():
+            if char in '01':
+                logic_string += char
+        # logic_string += self.bitvar1.get()
+        # logic_string += self.bitvar2.get()
+        # logic_string += self.bitvar3.get()
+        # logic_string += self.bitvar4.get()
+        # logic_string += self.bitvar5.get()
         return logic_string
 
     # returns a list of keys for every file in the folder, and a list of all the Rs, Ls and Cs
