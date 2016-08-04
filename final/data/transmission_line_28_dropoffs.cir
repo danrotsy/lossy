@@ -92,7 +92,7 @@ I5 InPulse InRefPulse PULSE(0 -50m 6n 100p 100p 1.3n) AC 1
 ;step param Rline 0.02 2 .8
 ;step param Lline 0.079n 7.9n 3.16n
 ;step param Cline 0.22p 22p 8.8p
-.param  Cdrp = 1p  Rterm =sqrt(Lline/Cline) Lenline=5 Rline=1.02 Lline=1.659n Cline=2.42p
+.param Cdrp=1p  Rterm=sqrt(Lline/Cline) Lenline=5 Rline=1.02 Lline=1.659n Cline=2.42p
 .save V(Out) V(N001) V(N014) (N026)  V(InPulse)
 .model LossyTL  LTRA(len=Lenline R=Rline L=Lline C=Cline)
 .backanno
