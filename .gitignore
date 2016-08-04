@@ -2,12 +2,9 @@ new
 old
 final/src
 final/clean/main_save.p
-final/clean/data/transmission_line_10_dropoffs/MultidropBode
-final/clean/data/transmission_line_14_dropoffs/MultidropBode
-final/clean/data/transmission_line_28_dropoffs/MultidropBode
-final/clean/data/transmission_line_10_dropoffs/MultidropTransient
-final/clean/data/transmission_line_14_dropoffs/MultidropTransient
-final/clean/data/transmission_line_28_dropoffs/MultidropTransient
+final/clean/data/transmission_line_10_dropoffs
+final/clean/data/transmission_line_14_dropoffs
+final/clean/data/transmission_line_28_dropoffs
 final/clean/tmp$x$y%z&_0.tmp
 final/clean/tmp$x$y%z&_1.tmp
 final/clean/tmp$x$y%z&_3.tmp
