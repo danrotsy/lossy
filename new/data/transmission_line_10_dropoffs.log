@@ -1,4 +1,0 @@
-Circuit: *LTSpiceTransmissionLines\LTSpice\sim\main\tranmission_line_10_dropoffs.asc
-
-lossytl: using linear interpolation because trytocompact option specified
-.OP point found by inspection.

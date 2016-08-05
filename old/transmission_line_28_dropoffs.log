@@ -1,4 +1,0 @@
-Circuit: * C:\LTSpiceTransmissionLines\LTSpice\sim\main\tranmission_line.asc
-
-lossytl: using linear interpolation because trytocompact option specified
-.OP point found by inspection.
