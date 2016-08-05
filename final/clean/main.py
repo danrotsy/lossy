@@ -431,7 +431,7 @@ class MainMenu(Frame):
             for l in out[1]:
                 for c in out[2]:
                     for a in out[5]:
-                        todo.append(((self.floatToSci(r),self.floatToSci(l),self.floatToSci(c)),str(out[3]) + 'p',signal,a,out[6],str(out[7]),self.get_logic_string()))
+                        todo.append(((self.floatToSci(r),self.floatToSci(l),self.floatToSci(c)),str(out[3]) + 'p',signal,a,out[6],str(out[7]),self.get_logic_string(), self.bittimevar.get()[:-1]))
         print
         print 'TODO:'
         for item in todo:
@@ -463,9 +463,9 @@ class MainMenu(Frame):
                     vin += ' '
                     vin_ += '_'
                 print vin
-                cmd = 'Auto_LTSpice_Now.exe {} {} {} {} {} {} {} {} "{}"'.format(key[4], analysis, cdrp, lenline, key[0][0], key[0][1], key[0][2], key[2], vin[:-1])
+                cmd = 'Auto_LTSpice_Now.exe {} {} {} {} {} {} {} {} "{}" {}'.format(key[4], analysis, cdrp, lenline, key[0][0], key[0][1], key[0][2], key[2], vin[:-1], key[7])
                 os.system(cmd)
-                self.folder_dict[key] = '..\data\{}\Multidrop{}\{}_Cdrp={}_Rterm=sqrt(Lline_Cline)_Lenline={}_Rline={}_Lline={}_Cline={}_Vin={}_{}.csv'.format(filename, path, analysiskey, cdrp,lenline,key[0][0], key[0][1],key[0][2],vin_[:-1],key[2]) #self.floatToSci(key[0][0]), self.floatToSci(key[0][1]), self.floatToSci(key[0][2]),cdrp, lenline, key[2])
+                self.folder_dict[key] = '..\data\{}\Multidrop{}\{}_Cdrp={}_Rterm=sqrt(Lline_Cline)_Lenline={}_Rline={}_Lline={}_Cline={}_Vin={}_BitTime={}_{}.csv'.format(filename, path, analysiskey, cdrp,lenline,key[0][0], key[0][1],key[0][2],vin_[:-1], key[7], key[2]) #self.floatToSci(key[0][0]), self.floatToSci(key[0][1]), self.floatToSci(key[0][2]),cdrp, lenline, key[2])
                 print "COMMAND:", cmd
                 print "KEY:", key
                 print "FOLDER_DICT", self.folder_dict[key]
@@ -722,24 +722,34 @@ class MainMenu(Frame):
                             analy = "tran"
                         else:
                             analy = "ac"
-                        if f[-7:-4] == "out":
-                            signal = "Vout"
-                        elif f[-7:-4] == "rst":
-                            signal = "Vfirst"
-                        elif f[-7:-4] == "ast":
-                            signal = "Vlast"
-                        elif f[-7:-4] == "dle":
-                            signal = "Vmiddle"
-                        else:
-                            signal = "Vin"
-                        print f[-19:-4]
                         vin = ""
-                        for char in f[-19:-4]:
-                            if char in "01":
+                        bit_time = ""
+                        for tok in f.split('_'):
+                            if tok == "Vout":
+                                signal = "Vout"
+                            elif tok == "Vfirst":
+                                signal = "Vfirst"
+                            elif tok == "Vlast":
+                                signal = "Vlast"
+                            elif tok == "Vmiddle":
+                                signal = "Vmiddle"
+                            else:
+                                signal = "Vin"
+                            if tok[:2] == "Vin":
+                                tok[-1] += char
+                            if tok in "01":
                                 vin += char
+                            if tok[:7] == "BitTime":
+                                bit_time = tok[7:]
+                                print bit_time
+                                
+                        #print f[-22:-13]
+                        #for char in f[-22:-13]:
+                        #    if char in "01":
+                        #        vin += char
                         print vin
                         tuple = (var[3], var[4], var[5])
-                        tuple2 = (tuple, var[0], signal, analy, a, var[2], vin)
+                        tuple2 = (tuple, var[0], signal, analy, a, var[2], vin, bit_time)
                         folder_dict[tuple2] = file_list[-1]
         self.folder_dict = folder_dict
     # saves folder_dict, Rvals, Lvals, and Cvals in a pickle file
