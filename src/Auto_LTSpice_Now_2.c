@@ -272,6 +272,9 @@ int main(int argc, char* argv[])
 		sprintf(filename_buffer, "_%d", net.vin[n]);
 		strcat(filename_buffer2, filename_buffer);
 	}
+	sprintf(filename_buffer, "_BitTime=%s", argv[10]);
+	printf("Filename buffer: %s\n", filename_buffer);
+	strcat(filename_buffer2, filename_buffer);
 	strcat(filename_buffer2, ".raw");
 	system(cmd_ltspice);
 	system("timeout 2");
@@ -310,5 +313,11 @@ int main(int argc, char* argv[])
 		
 		system(cmd_ltsputil);
 	}
+	
+	remove("tmp$x$y%z&_0.tmp");
+	remove("tmp$x$y%z&_1.tmp");
+	remove("tmp$x$y%z&_3.tmp");
+	remove("tmp$x$y%z&_4.tmp");
+	
 	return 0;
 }

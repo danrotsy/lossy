@@ -134,7 +134,7 @@ int initialize_netlist(struct netlist *net, int argc, char **argv)
 	printf("Determining the delay between pulses...\n");
 	
 	char delay_str[MAX_CHAR];
-	float delta_delay = str_to_expo(DELTA_DELAY[atoi(argv[10])]);
+	float delta_delay = str_to_expo(argv[10]);
 	float rise_fall = str_to_expo(RISE_FALL);
 	char buffer_str[MAX_CHAR];
 
@@ -255,7 +255,8 @@ int initialize_netlist(struct netlist *net, int argc, char **argv)
 		net->save_str[n] = malloc(MAX_CHAR*sizeof(char));
 	
 	char tran_time[MAX_CHAR];
-	expo_to_str(tran_time, delay);
+	//simulation windows in 1.5 times longer than all the pulses together
+	expo_to_str(tran_time, 1.5*delay);
 	printf("Delay tmp: %e to %s\n", delay, tran_time);
 	sprintf(net->tran_str, ".tran 0 %s\n", tran_time);
 	
