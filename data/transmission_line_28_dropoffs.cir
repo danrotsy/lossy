@@ -82,14 +82,12 @@ O27 InPulse InRefPulse N001 N027 LossyTL
 R16 InPulse InRefPulse {Rterm}
 R17 InRefPulse 0 100k
 R2 Out OutRef {Rterm}
-I1 InPulse InRefPulse PULSE(0 -10m 0.0 2n 2n 16n) AC 1
-I2 InPulse InRefPulse PULSE(0 0 20.0n 2n 2n 16n) AC 1
-I3 InPulse InRefPulse PULSE(0 0 40.0n 2n 2n 16n) AC 1
-I4 InPulse InRefPulse PULSE(0 0 60.0n 2n 2n 16n) AC 1
-I5 InPulse InRefPulse PULSE(0 0 80.0n 2n 2n 16n) AC 1
-.tran 0 100n
+I1 InPulse InRefPulse PULSE(0 -5m 0.0 0 200p 39.8n) AC 1
+I2 InPulse InRefPulse PULSE(0 0 40.0n 200p 200p 9.6n) AC 1
+I3 InPulse InRefPulse PULSE(0 -5m 50.0n 200p 0 19.8n) AC 1
+.tran 0 200.0n
 ;ac oct 50 10k 1000Meg
-.param Cdrp=2.0p Rterm=sqrt(Lline/Cline) Lenline=4.0 Rline=420.0m Lline=1.0n Cline=2.3p
+.param Cdrp=5.0p Rterm=sqrt(Lline/Cline) Lenline=9.0 Rline=820.0m Lline=10.0n Cline=10.0p
 .save V(Out) V(N001) V(N014) (N026) V(InPulse)
 .model LossyTL  LTRA(len=Lenline R=Rline L=Lline C=Cline)
 .backanno
