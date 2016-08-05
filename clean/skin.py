@@ -33,12 +33,12 @@ except ImportError:
 # Skin Effect Single Transfer Functions
 # ---------------   ---------------------------------------------------------------
 # the general function that returns a specific transfer function for given l,c
-def get_skin_transfer_func(folder_dict,rvals,l,c,Cdrpin,signal,drops,lenline,pulse,res,freq_domain,width,thickness):
+def get_skin_transfer_func(folder_dict,rvals,l,c,Cdrpin,signal,drops,lenline,pulse,bit_time,res,freq_domain,width,thickness):
     '''
     the general function that returns a specific transfer function for given l,c
     '''
-    transfer_functions = get_r_functions(folder_dict,rvals,l,c,Cdrpin,signal,drops,lenline,pulse,res)
-    return transpose(transfer_functions, rvals, freq_domain,thickness)
+    transfer_functions = get_r_functions(folder_dict,rvals,l,c,Cdrpin,signal,drops,lenline,pulse,bit_time,res)
+    return transpose(transfer_functions, rvals, freq_domain,width,thickness)
 # overlays transfer functions of different r's to simulate skin effect
 def transpose(transfer_functions, rvals, freq_domain,width,thickness):
     '''
@@ -73,20 +73,20 @@ def transpose(transfer_functions, rvals, freq_domain,width,thickness):
         skin_func[2].append(bode.get_val(func[0],func[2], f))
     return skin_func
 # gets all transfer functions with given l and c varying through r
-def get_r_functions(folder_dict,rvals,l,c,Cdrpin,signal,drops,lenline,pulse,res):
+def get_r_functions(folder_dict,rvals,l,c,Cdrpin,signal,drops,lenline,pulse,bit_time,res):
     '''
     gets all transfer functions with given l and c varying through r
     '''
     approximations = {}
     transfer_functions = {}
     for r in rvals:
-        approximations[float('%2.1f'%r)] = folder_dict[vals_to_key(r,l,c,Cdrpin,signal,"ac",drops,lenline,pulse)]
-        print str(folder_dict[vals_to_key(r,l,c,Cdrpin,signal,"ac",drops,lenline,pulse)]),'expanded to key','%2.1f'%r
+        approximations[float('%2.1f'%r)] = folder_dict[vals_to_key(r,l,c,Cdrpin,signal,"ac",drops,lenline,pulse,bit_time)]
+        print str(folder_dict[vals_to_key(r,l,c,Cdrpin,signal,"ac",drops,lenline,pulse,bit_time)]),'expanded to key','%2.1f'%r
     for r in rvals:
         transfer_functions[float('%2.1f'%r)] = bode.transfer_function(approximations[float('%2.1f'%r)],res)
     return transfer_functions
 # given values, finds the key for folder_dict for the file with the given values
-def vals_to_key(rin,lin,cin,Cdrpin,signal,typein,drops,lenline,pulse):
+def vals_to_key(rin,lin,cin,Cdrpin,signal,typein,drops,lenline,pulse,bit_time):
     '''
     rin         a float or string
     lin         a float or string
@@ -96,7 +96,7 @@ def vals_to_key(rin,lin,cin,Cdrpin,signal,typein,drops,lenline,pulse):
     typein      a string (ac or trans)
     '''
     r_tuple = (floatToSci(rin),lin,cin)
-    return (r_tuple,Cdrpin,signal,typein,drops,lenline,pulse)
+    return (r_tuple,Cdrpin,signal,typein,drops,lenline,pulse,bit_time)
 # finds the resistance due to skin effect at a given frequency
 def get_r(frequency,width,thickness):
     '''

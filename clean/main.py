@@ -143,7 +143,7 @@ class MainMenu(Frame):
         self.bittimelabel.place(x=145,y=98)
         self.bittimevar = StringVar(self)
         self.bittimevar.set('10ns')
-        self.bittimelibrary = OptionMenu(self,self.bittimevar, '', '1ns', '2ns', '3ns', '4ns', '5ns', '6ns', '7ns', '8ns', '9ns', '10ns')
+        self.bittimelibrary = OptionMenu(self,self.bittimevar, '', '1ns', '2ns', '3ns', '4ns', '5ns', '6ns', '7ns', '8ns', '9ns', '10ns', '11ns', '12ns', '13ns', '14ns', '15ns', '16ns', '17ns', '18ns', '19ns', '20ns')
         self.bittimelibrary.place(x=165,y=95)
 
         self.rlockvar = BooleanVar()
@@ -496,7 +496,7 @@ class MainMenu(Frame):
     def get_thickness(self):
         '''
         '''
-        thickness_sci = self.thickness_scivar.get()[:-1]
+        thickness_sci = self.thicknessvar.get()[:-1]
         return self.sciToFloat(thickness_sci)
     #
     def get_width(self):
@@ -548,23 +548,23 @@ class MainMenu(Frame):
                 new_amp = bode.apply_transfer_func(freq, new_amp, inv_list[i])
                 new_amp = bode.apply_transfer_func(freq, new_amp, low_pass_filter)
                 new_v = bode.inv_fourier(freq,new_amp)
-                x_list.append(bode.genrange(1e-7,len(new_v)))
+                x_list.append(bode.genrange(2e-7,len(new_v)))
                 y_list.append(new_v)
             self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title, color_list)
         if (self.var.get() == 'Skin Depth'):
             t,v,amp,freq = t_list[0],v_list[0],amp_list[0],freq_list[0]
             color_list.append((color,0,1-color))
             color += color_step
-            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], todo[0][6], res, bode.genrange(1.0e9,100),self.get_width(),self.get_thickness())
+            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], todo[0][6], todo[0][7], res, bode.genrange(1.0e9,200),self.get_width(),self.get_thickness())
             new_amp = bode.apply_transfer_func(freq, amp, inv_list[0])
             new_amp = bode.apply_transfer_func(freq, new_amp, skin_depth_transfer_func)
             new_v = bode.inv_fourier(freq, new_amp)
-            x_list.append(bode.genrange(1e-7,len(new_v)))
+            x_list.append(bode.genrange(2e-7,len(new_v)))
             y_list.append(new_v)
             self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title, color_list)
         if (self.var.get() == 'Skin Depth Bode'):
             color_list.append((color,0,1-color))
-            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], todo[0][6], res, bode.genrange(1.0e9,100),self.get_width(),self.get_thickness())
+            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], todo[0][6], todo[0][7], res, bode.genrange(1.0e9,200),self.get_width(),self.get_thickness())
             skin_depth_transfer_func = bode.to_dB(skin_depth_transfer_func)
             x_list.append(skin_depth_transfer_func[0])
             y_list.append(skin_depth_transfer_func[1])
@@ -573,13 +573,13 @@ class MainMenu(Frame):
             t,v,amp,freq = t_list[0],v_list[0],amp_list[0],freq_list[0]
             color_list.append((color,0,1-color))
             color += color_step
-            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], todo[0][6], res, bode.genrange(1.0e9,100),self.get_width(),self.get_thickness())
+            skin_depth_transfer_func = skin.get_skin_transfer_func(self.folder_dict, self.Rvals, todo[0][0][1], todo[0][0][2], todo[0][1], todo[0][2], todo[0][4], todo[0][5], todo[0][6], todo[0][7], res, bode.genrange(2.0e9,100),self.get_width(),self.get_thickness())
             skin_depth_transfer_func_inv = bode.invert_known_transfer_function(skin_depth_transfer_func)
             new_amp = bode.apply_transfer_func(freq, amp, inv_list[0])
             new_amp = bode.apply_transfer_func(freq, new_amp, skin_depth_transfer_func_inv)
             new_amp = bode.apply_transfer_func(freq, new_amp, low_pass_filter)
             new_v = bode.inv_fourier(freq, new_amp)
-            x_list.append(bode.genrange(1e-7,len(new_v)))
+            x_list.append(bode.genrange(2e-7,len(new_v)))
             y_list.append(new_v)
             self.new_figure_no_file(title, x_list, y_list, x_axis_title, y_axis_title, color_list)
     # returns r,l,c description for title
@@ -742,7 +742,7 @@ class MainMenu(Frame):
                             if tok[:7] == "BitTime":
                                 bit_time = tok[7:]
                                 print bit_time
-                                
+
                         #print f[-22:-13]
                         #for char in f[-22:-13]:
                         #    if char in "01":
